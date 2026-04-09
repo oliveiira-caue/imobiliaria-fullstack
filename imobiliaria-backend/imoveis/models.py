@@ -48,3 +48,31 @@ class ImagemImovel(models.Model):
 
     def __str__(self):
         return f"Foto de: {self.imovel.titulo}"
+    
+
+class Lead(models.Model):
+    STATUS_CHOICES = [
+        ('novo', 'Novo Contato'),
+        ('atendimento', 'Em Atendimento'),
+        ('fechado', 'Negócio Fechado'),
+        ('perdido', 'Perdido/Desistiu'),
+    ]
+
+    nome = models.CharField(max_length=150)
+    email = models.EmailField(blank=True, null=True)
+    telefone = models.CharField(max_length=20)
+    mensagem = models.TextField()
+
+    imovel_interesse = models.ForeignKey(
+        Imovel, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='leads'
+    )
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='novo')
+    data_criacao = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nome} - {self.telefone}"

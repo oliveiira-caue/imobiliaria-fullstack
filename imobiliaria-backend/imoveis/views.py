@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Imovel, ImagemImovel
 from django.shortcuts import get_object_or_404
+from .models import Imovel, ImagemImovel, Lead
 
 class ImovelCriarView(APIView):
     def post(self, request, *args, **kwargs):
@@ -122,3 +123,57 @@ class ImovelDetalhesView(APIView):
         imovel.ativo = not imovel.ativo  
         imovel.save()
         return Response({"mensagem": "Status alterado com sucesso!", "ativo": imovel.ativo}, status=status.HTTP_200_OK)
+    
+class LeadListaView(APIView):
+    def get(self, request):
+        leads = Lead.objects.all().order_by('-data_criacao')
+        dados_leads = []
+        
+        for lead in leads:
+            dados_leads.append({
+                "id": lead.id,
+                "nome": lead.nome,
+                "email": lead.email,
+                "telefone": lead.telefone,
+                "mensagem": lead.mensagem,
+                "status": lead.status,
+                "data_criacao": lead.data_criacao.strftime("%d/%m/%Y %H:%M"),
+                "imovel_titulo": lead.imovel_interesse.titulo if lead.imovel_interesse else "Contato Geral"
+            })
+            
+        return Response(dados_leads, status=status.HTTP_200_OK)
+
+
+    def post(self, request):
+        dados = request.data
+        try:
+            imovel_id = dados.get('imovel_id')
+            imovel = Imovel.objects.filter(id=imovel_id).first() if imovel_id else None
+            
+            Lead.objects.create(
+                nome=dados.get('nome'),
+                email=dados.get('email', ''),
+                telefone=dados.get('telefone'),
+                mensagem=dados.get('mensagem', ''),
+                imovel_interesse=imovel
+            )
+            return Response({"mensagem": "Contato recebido com sucesso!"}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"erro": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class LeadDetalheView(APIView):
+
+    def patch(self, request, pk):
+        lead = get_object_or_404(Lead, pk=pk)
+        novo_status = request.data.get('status')
+        
+
+        status_validos = dict(Lead.STATUS_CHOICES).keys()
+        if novo_status in status_validos:
+            lead.status = novo_status
+            lead.save()
+            return Response({"mensagem": "Status atualizado!"}, status=status.HTTP_200_OK)
+            
+        return Response({"erro": "Status inválido"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
