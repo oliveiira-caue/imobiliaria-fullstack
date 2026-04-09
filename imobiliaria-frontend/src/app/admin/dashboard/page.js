@@ -90,7 +90,7 @@ export default function Dashboard() {
 
           {abaAtiva === "meus_imoveis" && <ListaImoveis aoEditar={iniciarEdicao} />}
           
-          {abaAtiva === "leads" && <div className="text-slate-600 text-center py-24 font-medium italic">Base de leads em espera.</div>}
+          {abaAtiva === "leads" && <ListaLeads />}
         </div>
       </main>
     </div>
@@ -553,6 +553,136 @@ function ListaImoveis({ aoEditar }) {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function ListaLeads() {
+  const [leads, setLeads] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    buscarLeads();
+  }, []);
+
+  const buscarLeads = async () => {
+    try {
+      const resposta = await fetch("http://localhost:8000/api/leads/");
+      if (resposta.ok) {
+        const dados = await resposta.json();
+        setLeads(dados);
+      }
+    } catch (erro) {
+      console.error("Erro ao buscar leads:", erro);
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const atualizarStatus = async (id, novoStatus) => {
+    const token = localStorage.getItem("tokenImobiliaria");
+    try {
+      const resposta = await fetch(`http://localhost:8000/api/leads/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token
+        },
+        body: JSON.stringify({ status: novoStatus })
+      });
+      if (resposta.ok) {
+        setLeads(prev => prev.map(lead => lead.id === id ? { ...lead, status: novoStatus } : lead));
+      }
+    } catch (erro) {
+      alert("Erro ao atualizar status.");
+    }
+  };
+
+  const abrirWhatsApp = (telefone, nome, imovel) => {
+    const numeroLimpo = telefone.replace(/\D/g, "");
+    // Monta a mensagem mágica
+    const texto = `Olá, ${nome}! Sou o corretor da Imobi e vi que você se interessou pelo anúncio do ${imovel}. Como posso te ajudar?`;
+    window.open(`https://wa.me/55${numeroLimpo}?text=${encodeURIComponent(texto)}`, '_blank');
+  };
+
+  const getStatusCor = (status) => {
+    switch(status) {
+      case 'novo': return 'bg-blue-500/20 text-blue-500';
+      case 'atendimento': return 'bg-amber-500/20 text-amber-500';
+      case 'fechado': return 'bg-emerald-500/20 text-emerald-500';
+      case 'perdido': return 'bg-red-500/20 text-red-500';
+      default: return 'bg-slate-500/20 text-slate-500';
+    }
+  };
+
+  if (carregando) return <div className="text-center py-20 text-orange-500 animate-pulse font-bold tracking-widest">CARREGANDO CLIENTES...</div>;
+
+  return (
+    <div className="bg-[#151515] p-6 md:p-12 rounded-[40px] border border-white/5 shadow-2xl animate-in fade-in duration-500">
+      <div className="flex justify-between items-center mb-10">
+        <h2 className="text-xl font-bold text-white tracking-tight">Gestão de Clientes (Leads)</h2>
+        <span className="bg-orange-600/20 text-orange-500 py-1 px-4 rounded-full text-xs font-bold">{leads.length} Contatos</span>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-white/10 text-[10px] uppercase tracking-widest text-slate-500">
+              <th className="pb-4 font-bold pl-4">Cliente / Contato</th>
+              <th className="pb-4 font-bold">Interesse</th>
+              <th className="pb-4 font-bold">Data</th>
+              <th className="pb-4 font-bold">Status</th>
+              <th className="pb-4 font-bold pr-4 text-right">Ação</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {leads.map(lead => (
+              <tr key={lead.id} className="hover:bg-white/[0.02] transition-colors group">
+                <td className="py-5 pl-4">
+                  <p className="font-bold text-white text-sm">{lead.nome}</p>
+                  <p className="text-xs text-slate-400 mt-1">{lead.telefone}</p>
+                  <p className="text-[10px] text-slate-500 mt-2 truncate max-w-[200px] italic opacity-0 group-hover:opacity-100 transition-opacity" title={lead.mensagem}>"{lead.mensagem}"</p>
+                </td>
+                <td className="py-5">
+                  <span className="bg-[#111] border border-white/5 text-slate-300 text-[11px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-md">
+                    {lead.imovel_titulo}
+                  </span>
+                </td>
+                <td className="py-5 text-xs text-slate-400 font-medium">
+                  {lead.data_criacao}
+                </td>
+                <td className="py-5">
+                  <select 
+                    value={lead.status}
+                    onChange={(e) => atualizarStatus(lead.id, e.target.value)}
+                    className={`text-[10px] font-bold uppercase tracking-wider rounded-md px-3 py-1.5 border-none outline-none cursor-pointer appearance-none transition-colors ${getStatusCor(lead.status)}`}
+                  >
+                    <option value="novo" className="bg-[#111] text-white">Novo Contato</option>
+                    <option value="atendimento" className="bg-[#111] text-white">Em Atendimento</option>
+                    <option value="fechado" className="bg-[#111] text-white">Venda Fechada</option>
+                    <option value="perdido" className="bg-[#111] text-white">Perdido</option>
+                  </select>
+                </td>
+                <td className="py-5 pr-4 text-right">
+                  <button 
+                    onClick={() => abrirWhatsApp(lead.telefone, lead.nome, lead.imovel_titulo)}
+                    className="bg-green-600/10 hover:bg-green-600 text-green-500 hover:text-white px-4 py-2 rounded-lg text-[10px] font-bold transition-all uppercase tracking-widest inline-flex items-center gap-2"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                    Responder
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        
+        {leads.length === 0 && (
+          <div className="text-slate-600 text-center py-24 font-medium italic border border-dashed border-white/10 rounded-2xl mt-4">
+            Nenhum contato recebido ainda.
+          </div>
+        )}
       </div>
     </div>
   );
