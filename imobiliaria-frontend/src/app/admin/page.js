@@ -18,11 +18,11 @@ export default function LoginAdmin() {
     setCarregando(true);
 
     try {
-      const resposta = await fetch("http://localhost:8000/api/imoveis/", {
-    method: "POST",
-    headers: { "x-auth-token": token },
-    body: formData,
-});
+      const resposta = await fetch("http://localhost:8000/api/token/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: email, password: senha }),
+      });
 
       const dados = await resposta.json();
 
@@ -34,6 +34,7 @@ export default function LoginAdmin() {
         setErro(dados.erro || "E-mail ou senha incorretos.");
       }
     } catch (error) {
+      console.error("🚨 ERRO REAL REVELADO:", error);
       setErro("Falha ao conectar com o servidor.");
     } finally {
       setCarregando(false);
@@ -59,12 +60,12 @@ export default function LoginAdmin() {
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">E-mail</label>
             <input
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-              placeholder="corretor@imobi.com"
+              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              placeholder="E-mail ou Usuário"
             />
           </div>
 
@@ -75,7 +76,7 @@ export default function LoginAdmin() {
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+              className="w-full rounded-lg border border-slate-300 px-4 py-3 text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="••••••••"
             />
           </div>
@@ -83,7 +84,7 @@ export default function LoginAdmin() {
           <button
             type="submit"
             disabled={carregando}
-            className="w-full rounded-lg bg-orange-600 py-3 font-semibold text-white transition hover:bg-orange-700 disabled:opacity-70"
+            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-70"
           >
             {carregando ? "Entrando..." : "Entrar no Sistema"}
           </button>
