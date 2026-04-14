@@ -79,6 +79,110 @@ function IconClose() {
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
+   VITRINE DE DESTAQUES — dinâmica, da API
+═══════════════════════════════════════════════════════════════════════════ */
+function VitrineDestaques() {
+  const [imoveis, setImoveis] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    fetch("http://localhost:8000/api/imoveis/lista/")
+      .then(r => r.json())
+      .then(data => setImoveis(data.filter(im => im.ativo !== false).slice(0, 6)))
+      .catch(() => {})
+      .finally(() => setCarregando(false));
+  }, []);
+
+  const formatarPreco = (v) =>
+    v ? Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }) : "Sob consulta";
+
+  return (
+    <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <p className="text-blue-500 text-xs font-semibold tracking-widest uppercase mb-1">Curadoria especial</p>
+          <h2 className="text-2xl font-extrabold text-white">Imóveis em Destaque</h2>
+        </div>
+        <Link
+          href="/resultados"
+          className="hidden sm:inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors"
+        >
+          Ver todos
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {carregando ? (
+          /* Skeleton loaders */
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-[#0F172A] border border-slate-800 rounded-xl overflow-hidden animate-pulse">
+              <div className="h-44 bg-slate-800" />
+              <div className="p-4 space-y-2">
+                <div className="h-2.5 bg-slate-800 rounded w-1/3" />
+                <div className="h-4 bg-slate-800 rounded w-3/4" />
+                <div className="h-5 bg-slate-800 rounded w-1/2" />
+              </div>
+            </div>
+          ))
+        ) : imoveis.length === 0 ? (
+          <div className="col-span-3 py-16 text-center text-slate-500 text-sm">
+            Nenhum imóvel cadastrado ainda.
+          </div>
+        ) : (
+          imoveis.map((im) => (
+            <Link key={im.id} href={`/imoveis/${im.id}`} className="group block">
+              <article className="h-full bg-[#0F172A] border border-slate-800 rounded-xl overflow-hidden
+                                  hover:border-blue-600/50 hover:shadow-xl hover:shadow-blue-900/20
+                                  transition-all duration-300">
+                {/* Foto */}
+                <div className="relative h-44 bg-gradient-to-br from-slate-800 to-slate-900 overflow-hidden">
+                  {im.capa ? (
+                    <img src={im.capa} alt={im.titulo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  ) : (
+                    <>
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-transparent" />
+                      <IconHome className="absolute inset-0 m-auto w-12 h-12 text-slate-700" />
+                    </>
+                  )}
+                  <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-blue-600/90 backdrop-blur text-white text-[10px] font-bold">
+                    {im.tipo_imovel}
+                  </span>
+                  {im.ativo === false && (
+                    <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-slate-800/90 text-slate-400 text-[10px] font-semibold">
+                      Inativo
+                    </span>
+                  )}
+                </div>
+                {/* Dados */}
+                <div className="p-4">
+                  <p className="text-slate-500 text-[10px] uppercase tracking-widest mb-0.5">{im.bairro}</p>
+                  <h3 className="text-white font-bold text-sm mb-1 group-hover:text-blue-400 transition-colors line-clamp-1">
+                    {im.titulo}
+                  </h3>
+                  <p className="text-blue-400 font-extrabold text-lg mb-3">{formatarPreco(im.preco)}</p>
+                  <div className="flex gap-4 text-slate-400 text-xs border-t border-slate-800 pt-3">
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
+                      </svg>
+                      {im.quartos != null ? `${im.quartos} quartos` : "—"}
+                    </span>
+                    <span className="capitalize text-slate-500 text-[10px]">{im.finalidade}</span>
+                  </div>
+                </div>
+              </article>
+            </Link>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
    COMPONENTE PRINCIPAL
 ═══════════════════════════════════════════════════════════════════════════ */
 export default function HomePage() {
@@ -368,66 +472,8 @@ export default function HomePage() {
       </section>
 
       {/* ─── IMÓVEIS EM DESTAQUE ─────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <p className="text-blue-500 text-xs font-semibold tracking-widest uppercase mb-1">Curadoria especial</p>
-            <h2 className="text-2xl font-extrabold text-white">Imóveis em Destaque</h2>
-          </div>
-          <Link
-            href="#"
-            className="hidden sm:inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-xs font-medium transition-colors"
-          >
-            Ver todos
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
+      <VitrineDestaques />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[
-            { tipo: "Apartamento",       local: "Pinheiros, SP",       preco: "R$ 850.000",   quartos: 3, area: "90m²",  tag: "Destaque"  },
-            { tipo: "Casa em Condomínio", local: "Alphaville, SP",      preco: "R$ 1.450.000", quartos: 4, area: "280m²", tag: "Novo"      },
-            { tipo: "Sala Comercial",    local: "Barra da Tijuca, RJ",  preco: "R$ 620.000",   quartos: 2, area: "85m²",  tag: "Exclusivo" },
-          ].map((imovel, idx) => (
-            <article
-              key={idx}
-              className="group bg-[#0F172A] border border-slate-800 rounded-xl overflow-hidden
-                         hover:border-blue-600/50 hover:shadow-xl hover:shadow-blue-900/20 transition-all duration-300 cursor-pointer"
-            >
-              <div className="relative h-44 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-transparent" />
-                <IconHome className="w-12 h-12 text-slate-700" />
-                <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-bold">
-                  {imovel.tag}
-                </span>
-              </div>
-              <div className="p-4">
-                <p className="text-slate-400 text-[10px] uppercase tracking-widest mb-0.5">{imovel.tipo}</p>
-                <h3 className="text-white font-bold text-base mb-1 group-hover:text-blue-400 transition-colors">{imovel.local}</h3>
-                <p className="text-blue-400 font-extrabold text-lg mb-3">{imovel.preco}</p>
-                <div className="flex gap-4 text-slate-400 text-xs border-t border-slate-800 pt-3">
-                  <span className="flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
-                      <path strokeLinecap="round" strokeLinejoin="round"
-                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    {imovel.quartos} quartos
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
-                      <path strokeLinecap="round" strokeLinejoin="round"
-                        d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                    </svg>
-                    {imovel.area}
-                  </span>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
 
       {/* ─── FOOTER ──────────────────────────────────────────────────────── */}
       <footer className="border-t border-slate-800 bg-[#0F172A]">
