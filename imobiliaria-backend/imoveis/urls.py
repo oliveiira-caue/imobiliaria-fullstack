@@ -1,12 +1,13 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .views import (
-    ImovelCriarView, 
-    ImovelListaView, 
-    ImovelDetalhesView, 
-    LeadListaView, 
+    ImovelCriarView,
+    ImovelListaView,
+    ImovelDetalhesView,
+    LeadListaView,
     LeadDetalheView,
-    BuscaIAView # Adicionado aqui para ficar limpo
+    BuscaIAView,
+    GeocodificarView,
 )
 
 urlpatterns = [
@@ -24,4 +25,7 @@ urlpatterns = [
     
     # Busca com Inteligência Artificial (Groq)
     path('busca-ia/', BuscaIAView.as_view(), name='busca-ia'),
+
+    # Proxy de geocodificação (Nominatim via servidor)
+    path('geocodificar/', GeocodificarView.as_view(), name='geocodificar'),
 ]

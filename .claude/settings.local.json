@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(powershell.exe -Command 'echo $PROFILE')",
+      "Bash(powershell.exe -Command \"Test-Path 'C:\\\\Users\\\\Cauê\\\\Documents\\\\WindowsPowerShell\\\\Microsoft.PowerShell_profile.ps1'\")",
+      "Bash(powershell.exe -Command \"New-Item -ItemType Directory -Force -Path 'C:\\\\Users\\\\Cauê\\\\Documents\\\\WindowsPowerShell'\")",
+      "Bash(powershell.exe -Command \"Get-ExecutionPolicy -Scope CurrentUser\")",
+      "Bash(python -c \"from imoveis.models import ImagemImovel; print\\('OK'\\)\")",
+      "Bash(python -c ' *)"
+    ]
+  }
+}

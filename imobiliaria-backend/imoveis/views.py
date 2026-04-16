@@ -1,5 +1,7 @@
 import os
 import json
+import urllib.request
+import urllib.parse
 from groq import Groq
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -78,7 +80,12 @@ class ImovelListaView(APIView):
                 "tipo_imovel": im.tipo_imovel,
                 "finalidade": im.finalidade,
                 "bairro": im.bairro,
+                "cidade": im.cidade,
                 "preco": im.preco,
+                "area_util": im.area_util,
+                "quartos": im.quartos,
+                "banheiros": im.banheiros,
+                "vagas": im.vagas,
                 "capa": _capa_url(request, im),
                 "ativo": im.ativo,
             }
@@ -143,6 +150,12 @@ class ImovelDetalhesView(APIView):
         imovel.ativo = not imovel.ativo
         imovel.save()
         return Response({"mensagem": "Status alterado com sucesso!", "ativo": imovel.ativo}, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk):
+        imovel = get_object_or_404(Imovel, pk=pk)
+        titulo = imovel.titulo
+        imovel.delete()
+        return Response({"mensagem": f'Imóvel "{titulo}" excluído com sucesso!'}, status=status.HTTP_200_OK)
 
 
 # -------------------------------------------------------------------
@@ -231,6 +244,48 @@ class LeadDetalheView(APIView):
             lead.save()
             return Response({"mensagem": "Status atualizado!"}, status=status.HTTP_200_OK)
         return Response({"erro": "Status inválido"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, _request, pk):
+        lead = get_object_or_404(Lead, pk=pk)
+        nome = lead.nome
+        lead.delete()
+        return Response({"mensagem": f'Lead "{nome}" excluído com sucesso!'}, status=status.HTTP_200_OK)
+
+
+# -------------------------------------------------------------------
+# VIEW DE PROXY DE GEOCODIFICAÇÃO (Google Maps Geocoding API)
+# -------------------------------------------------------------------
+class GeocodificarView(APIView):
+    def get(self, request):
+        query = request.query_params.get('q', '').strip()
+        if not query:
+            return Response({"erro": "Parâmetro 'q' obrigatório."}, status=status.HTTP_400_BAD_REQUEST)
+
+        api_key = os.getenv("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY")
+        if not api_key:
+            return Response({"erro": "Chave da API do Google Maps não configurada."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        url = (
+            "https://maps.googleapis.com/maps/api/geocode/json"
+            f"?address={urllib.parse.quote(query)}"
+            f"&key={api_key}"
+            "&language=pt-BR"
+            "&region=br"
+        )
+        try:
+            with urllib.request.urlopen(url, timeout=10) as resp:
+                data = json.loads(resp.read().decode())
+
+            if data.get("status") == "OK" and data.get("results"):
+                location = data["results"][0]["geometry"]["location"]
+                return Response({"lat": location["lat"], "lon": location["lng"]}, status=status.HTTP_200_OK)
+
+            if data.get("status") == "ZERO_RESULTS":
+                return Response({"erro": "Endereço não encontrado. Tente preencher com mais detalhes."}, status=status.HTTP_404_NOT_FOUND)
+
+            return Response({"erro": f"Erro na API: {data.get('status')}"}, status=status.HTTP_502_BAD_GATEWAY)
+        except Exception as e:
+            return Response({"erro": f"Falha no serviço de geocodificação: {e}"}, status=status.HTTP_502_BAD_GATEWAY)
 
 
 # -------------------------------------------------------------------

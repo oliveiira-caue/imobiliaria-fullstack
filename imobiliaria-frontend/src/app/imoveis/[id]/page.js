@@ -18,41 +18,45 @@ const IconMapPin = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
   </svg>
 );
-/* Cama — quartos */
+/* Cama — quartos (mesmo SVG do dashboard) */
 const IconBed = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12V19M21 12V19M3 12C3 9.791 4.791 8 7 8H17C19.209 8 21 9.791 21 12M3 12H21M7 8V6C7 4.895 7.895 4 9 4H15C16.105 4 17 4.895 17 6V8" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 19H21" />
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8" />
+    <path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" />
+    <path d="M12 4v6" /><path d="M2 18h20" />
   </svg>
 );
-/* Cama dupla — suítes */
+/* Suítes — cama com marcador central (mesmo SVG do dashboard) */
 const IconBedDouble = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M2 12V19M22 12V19M2 12C2 9.791 3.791 8 6 8H18C20.209 8 22 9.791 22 12M2 12H22M2 19H22" />
-    <rect x="6" y="9" width="4" height="3" rx="1" />
-    <rect x="14" y="9" width="4" height="3" rx="1" />
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8" />
+    <path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4" />
+    <path d="M12 4v6" /><path d="M2 18h20" />
+    <circle cx="12" cy="15" r="1" fill="currentColor" />
   </svg>
 );
-/* Banheiro */
+/* Banheiro (mesmo SVG do dashboard) */
 const IconBath = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4 12H20M20 12V17C20 18.105 19.105 19 18 19H6C4.895 19 4 18.105 4 17V12M6 19V21M18 19V21" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12V5C6 3.895 6.895 3 8 3C9.105 3 10 3.895 10 5V6" />
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />
+    <line x1="10" x2="8" y1="5" y2="7" />
+    <line x1="2" x2="22" y1="12" y2="12" />
+    <line x1="7" x2="7" y1="19" y2="21" />
+    <line x1="17" x2="17" y1="19" y2="21" />
   </svg>
 );
-/* Carro — vagas */
+/* Carro — vagas (mesmo SVG do dashboard) */
 const IconCar = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M5 17H3V11L5.5 5H18.5L21 11V17H19" />
-    <circle cx="7.5" cy="17" r="2" />
-    <circle cx="16.5" cy="17" r="2" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3 11H21" />
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+    <circle cx="7" cy="17" r="2" /><path d="M9 17h6" /><circle cx="17" cy="17" r="2" />
   </svg>
 );
-/* Área */
+/* Área — setas de expansão diagonal (mesmo SVG do dashboard) */
 const IconArea = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" />
+    <line x1="21" x2="14" y1="3" y2="10" /><line x1="3" x2="10" y1="21" y2="14" />
   </svg>
 );
 const IconCheck  = () => <svg className="w-3.5 h-3.5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>;

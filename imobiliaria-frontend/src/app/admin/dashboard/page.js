@@ -166,6 +166,8 @@ function FormularioNovoImovel({ imovelId }) {
   const [valores, setValores] = useState({ preco: "R$ 0,00", valor_condominio: "R$ 0,00", iptu: "R$ 0,00" });
   const [erros, setErros] = useState({});
   const [resumoDados, setResumoDados] = useState({});
+  const [buscandoCoords, setBuscandoCoords] = useState(false);
+  const [erroCoords, setErroCoords] = useState("");
 
   const LISTA_COMODIDADES = [
     "Piscina", "Academia", "Churrasqueira", "Salão de Festas", "Playground",
@@ -253,6 +255,48 @@ function FormularioNovoImovel({ imovelId }) {
   const handleChangeDinheiro = (e) => {
     const { name, value } = e.target;
     setValores(prev => ({ ...prev, [name]: aplicarMascaraDinheiro(value) }));
+  };
+
+  const buscarCoordenadasAutomaticas = async () => {
+    const get = (name) => formRef.current?.querySelector(`[name="${name}"]`)?.value.trim() || "";
+    const rua = get("endereco");
+    const numero = get("numero");
+    const bairro = get("bairro");
+    const cidade = get("cidade");
+
+    if (!rua || !bairro || !cidade) {
+      setErroCoords("Preencha Rua, Bairro e Cidade antes de gerar as coordenadas.");
+      return;
+    }
+
+    if (!numero) {
+      setErroCoords("Para uma melhor precisão, por favor insira o número do seu imóvel.");
+    } else {
+      setErroCoords("");
+    }
+
+    setBuscandoCoords(true);
+    try {
+      const rawQuery = `${rua}, ${numero}, ${bairro}, ${cidade}, Brasil`;
+      const res = await fetch(
+        `http://localhost:8000/api/geocodificar/?q=${encodeURIComponent(rawQuery)}`
+      );
+      const data = await res.json();
+      if (res.ok) {
+        const setField = (name, val) => {
+          const el = formRef.current?.querySelector(`[name="${name}"]`);
+          if (el) el.value = val;
+        };
+        setField("latitude", data.lat);
+        setField("longitude", data.lon);
+      } else {
+        setErroCoords(data.erro || "Endereço não encontrado. Tente preencher com mais detalhes.");
+      }
+    } catch {
+      setErroCoords("Não foi possível conectar ao servidor. Verifique se o backend está rodando.");
+    } finally {
+      setBuscandoCoords(false);
+    }
   };
 
   const handleCepChange = async (e) => {
@@ -427,7 +471,7 @@ function FormularioNovoImovel({ imovelId }) {
         latitude: fe.latitude?.value || '',
         longitude: fe.longitude?.value || '',
         comodidades: comodidadesSelecionadas,
-        totalFotos: arquivosGaleria.length,
+        totalFotos: arquivosGaleria.length + fotosExistentesGaleria.length,
       });
     }
     setEtapaAtual(prev => Math.min(prev + 1, 5));
@@ -705,13 +749,43 @@ function FormularioNovoImovel({ imovelId }) {
 
               {/* Coordenadas GPS — Google Maps */}
               <div className="bg-[#080E1A] border border-slate-800/60 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400/70">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                    <circle cx="12" cy="9" r="2.5" />
-                  </svg>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Coordenadas GPS <span className="text-slate-600 normal-case font-normal">(opcional — para o Mapa)</span></p>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400/70">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                      <circle cx="12" cy="9" r="2.5" />
+                    </svg>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Coordenadas GPS <span className="text-slate-600 normal-case font-normal">(opcional — para o Mapa)</span></p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={buscarCoordenadasAutomaticas}
+                    disabled={buscandoCoords}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600/10 border border-blue-500/20 text-blue-400 text-[10px] font-semibold tracking-wide hover:bg-blue-600/20 hover:border-blue-500/40 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {buscandoCoords ? (
+                      <>
+                        <svg className="animate-spin" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M21 12a9 9 0 1 1-6.219-8.56" strokeLinecap="round" />
+                        </svg>
+                        Buscando...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+                        </svg>
+                        Gerar Automático
+                      </>
+                    )}
+                  </button>
                 </div>
+                {erroCoords && (
+                  <p className="text-xs text-amber-400/80 bg-amber-400/5 border border-amber-400/15 rounded-lg px-3 py-2 mb-3 flex items-center gap-1.5">
+                    <span>⚠</span>{erroCoords}
+                  </p>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={labelClass}>Latitude</label>
@@ -1298,30 +1372,99 @@ function ListaLeads() {
 
 // ─── Configurações do Painel ────────────────────────────────────────────────
 function ConfiguracoesPainel() {
-  const [confirmando, setConfirmando] = useState(false);
-  const [limpando, setLimpando] = useState(false);
-  const [resultado, setResultado] = useState(null); // { tipo: 'sucesso'|'erro', msg: '' }
+  // ── Estados — Gerenciar Imóveis ───────────────────────────────────────────
+  const [listandoImoveis, setListandoImoveis] = useState(false);
+  const [imoveisLista, setImoveisLista] = useState([]);
+  const [carregandoImoveis, setCarregandoImoveis] = useState(false);
+  const [confirmandoExclusaoId, setConfirmandoExclusaoId] = useState(null);
+  const [excluindoId, setExcluindoId] = useState(null);
+  const [resultadoExclusao, setResultadoExclusao] = useState(null);
 
-  const limparLeads = async () => {
-    setLimpando(true);
-    setResultado(null);
+  // ── Estados — Gerenciar Leads ─────────────────────────────────────────────
+  const [listandoLeads, setListandoLeads] = useState(false);
+  const [leadsLista, setLeadsLista] = useState([]);
+  const [carregandoLeads, setCarregandoLeads] = useState(false);
+  const [confirmandoExclusaoLeadId, setConfirmandoExclusaoLeadId] = useState(null);
+  const [excluindoLeadId, setExcluindoLeadId] = useState(null);
+  const [resultadoExclusaoLead, setResultadoExclusaoLead] = useState(null);
+
+  // ── Imóveis ───────────────────────────────────────────────────────────────
+  const carregarImoveis = async () => {
+    setCarregandoImoveis(true);
+    setResultadoExclusao(null);
+    try {
+      const res = await fetch("http://localhost:8000/api/imoveis/lista/");
+      const data = await res.json();
+      setImoveisLista(data);
+      setListandoImoveis(true);
+    } catch {
+      setResultadoExclusao({ tipo: "erro", msg: "Falha ao carregar imóveis." });
+    } finally {
+      setCarregandoImoveis(false);
+    }
+  };
+
+  const excluirImovel = async (id) => {
+    setExcluindoId(id);
+    setResultadoExclusao(null);
     const token = localStorage.getItem("tokenImobiliaria");
     try {
-      const res = await fetch("http://localhost:8000/api/leads/limpar/", {
+      const res = await fetch(`http://localhost:8000/api/imoveis/${id}/`, {
         method: "DELETE",
         headers: { "x-auth-token": token },
       });
       const data = await res.json();
       if (res.ok) {
-        setResultado({ tipo: "sucesso", msg: data.mensagem });
+        setImoveisLista(prev => prev.filter(im => im.id !== id));
+        setResultadoExclusao({ tipo: "sucesso", msg: data.mensagem });
       } else {
-        setResultado({ tipo: "erro", msg: data.erro || "Erro ao limpar leads." });
+        setResultadoExclusao({ tipo: "erro", msg: data.erro || "Erro ao excluir imóvel." });
       }
     } catch {
-      setResultado({ tipo: "erro", msg: "Falha de conexão com o servidor." });
+      setResultadoExclusao({ tipo: "erro", msg: "Falha de conexão com o servidor." });
     } finally {
-      setLimpando(false);
-      setConfirmando(false);
+      setExcluindoId(null);
+      setConfirmandoExclusaoId(null);
+    }
+  };
+
+  // ── Leads ─────────────────────────────────────────────────────────────────
+  const carregarLeads = async () => {
+    setCarregandoLeads(true);
+    setResultadoExclusaoLead(null);
+    try {
+      const res = await fetch("http://localhost:8000/api/leads/");
+      const data = await res.json();
+      setLeadsLista(data);
+      setListandoLeads(true);
+    } catch {
+      setResultadoExclusaoLead({ tipo: "erro", msg: "Falha ao carregar leads." });
+    } finally {
+      setCarregandoLeads(false);
+    }
+  };
+
+  const excluirLead = async (id) => {
+    setExcluindoLeadId(id);
+    setResultadoExclusaoLead(null);
+    const token = localStorage.getItem("tokenImobiliaria");
+    try {
+      const res = await fetch(`http://localhost:8000/api/leads/${id}/`, {
+        method: "DELETE",
+        headers: { "x-auth-token": token },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setLeadsLista(prev => prev.filter(l => l.id !== id));
+        setResultadoExclusaoLead({ tipo: "sucesso", msg: data.mensagem });
+      } else {
+        setResultadoExclusaoLead({ tipo: "erro", msg: data.erro || "Erro ao excluir lead." });
+      }
+    } catch {
+      setResultadoExclusaoLead({ tipo: "erro", msg: "Falha de conexão com o servidor." });
+    } finally {
+      setExcluindoLeadId(null);
+      setConfirmandoExclusaoLeadId(null);
     }
   };
 
@@ -1333,74 +1476,244 @@ function ConfiguracoesPainel() {
         <p className="text-slate-500 text-xs mt-1">Gerencie as configurações e dados do sistema.</p>
       </div>
 
-      {/* Card — Gestão de Dados */}
+      {/* Card — Gerenciar Leads */}
       <div className="bg-[#0F172A] border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl shadow-black/30">
-        {/* Card Header */}
         <div className="px-6 py-4 border-b border-slate-800/60 bg-[#0B1427]/50">
           <div className="flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
-              <ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
-            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Gestão de Dados</h2>
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Gerenciar Leads</h2>
           </div>
         </div>
 
-        {/* Ação: Limpar Leads */}
         <div className="p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-bold text-white">Limpar base de Leads</p>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                Remove permanentemente todos os contatos e formulários recebidos da base de dados.
-                <span className="text-amber-400/80 font-semibold"> Esta ação não pode ser desfeita.</span>
-              </p>
-            </div>
-
-            {!confirmando ? (
-              <button
-                onClick={() => { setConfirmando(true); setResultado(null); }}
-                className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 hover:border-red-500/40 rounded-xl text-xs font-bold uppercase tracking-wide transition-all"
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />
-                </svg>
-                Limpar base de leads
-              </button>
-            ) : (
-              <div className="flex flex-col gap-2 shrink-0">
-                <p className="text-[10px] text-amber-400 font-bold uppercase tracking-widest text-center">Tem certeza? Esta ação é irreversível.</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setConfirmando(false)}
-                    className="flex-1 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg border border-slate-700 transition-all"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={limparLeads}
-                    disabled={limpando}
-                    className="flex-1 px-3 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
-                  >
-                    {limpando ? (
-                      <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Limpando...</>
-                    ) : (
-                      <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg> Confirmar</>
-                    )}
-                  </button>
-                </div>
+          {!listandoLeads ? (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-bold text-white">Excluir lead da base de dados</p>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Selecione um contato para removê-lo permanentemente.
+                  <span className="text-amber-400/80 font-semibold"> Esta ação não pode ser desfeita.</span>
+                </p>
               </div>
-            )}
-          </div>
+              <button
+                onClick={carregarLeads}
+                disabled={carregandoLeads}
+                className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-slate-700/40 hover:bg-slate-700/70 text-slate-300 border border-slate-600/40 hover:border-slate-500/60 rounded-xl text-xs font-bold uppercase tracking-wide transition-all disabled:opacity-50"
+              >
+                {carregandoLeads ? (
+                  <><div className="w-3 h-3 border-2 border-slate-400/30 border-t-slate-300 rounded-full animate-spin" /> Carregando...</>
+                ) : (
+                  <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg> Selecionar Lead</>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{leadsLista.length} lead(s) encontrado(s)</p>
+                <button
+                  onClick={() => { setListandoLeads(false); setConfirmandoExclusaoLeadId(null); setResultadoExclusaoLead(null); }}
+                  className="text-xs text-slate-500 hover:text-slate-300 transition-colors underline underline-offset-2"
+                >
+                  Fechar lista
+                </button>
+              </div>
 
-          {/* Feedback */}
-          {resultado && (
-            <div className={`mt-4 flex items-center gap-2.5 px-4 py-3 rounded-xl border text-xs font-semibold ${resultado.tipo === "sucesso" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-400"}`}>
-              {resultado.tipo === "sucesso" ? (
+              {leadsLista.length === 0 ? (
+                <p className="text-slate-500 text-xs text-center py-6">Nenhum lead cadastrado.</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {leadsLista.map((lead) => (
+                    <div
+                      key={lead.id}
+                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-[#0B1120] border border-slate-800/60"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-500">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                          </svg>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-white text-xs font-semibold truncate">{lead.nome}</p>
+                          <p className="text-slate-500 text-[10px] truncate">{lead.imovel_titulo} · {lead.telefone}</p>
+                        </div>
+                      </div>
+
+                      {confirmandoExclusaoLeadId === lead.id ? (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <p className="text-[10px] text-amber-400 font-semibold hidden sm:block">Tem certeza?</p>
+                          <button
+                            onClick={() => setConfirmandoExclusaoLeadId(null)}
+                            className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded-lg border border-slate-700 transition-all"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            onClick={() => excluirLead(lead.id)}
+                            disabled={excluindoLeadId === lead.id}
+                            className="px-2.5 py-1.5 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold rounded-lg transition-all disabled:opacity-50 flex items-center gap-1"
+                          >
+                            {excluindoLeadId === lead.id ? (
+                              <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                              <><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg> Confirmar</>
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setConfirmandoExclusaoLeadId(lead.id); setResultadoExclusaoLead(null); }}
+                          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 hover:border-red-500/40 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all"
+                        >
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />
+                          </svg>
+                          Excluir
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {resultadoExclusaoLead && (
+            <div className={`mt-4 flex items-center gap-2.5 px-4 py-3 rounded-xl border text-xs font-semibold ${resultadoExclusaoLead.tipo === "sucesso" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-400"}`}>
+              {resultadoExclusaoLead.tipo === "sucesso" ? (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
               ) : (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
               )}
-              {resultado.msg}
+              {resultadoExclusaoLead.msg}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Card — Excluir Imóveis */}
+      <div className="mt-5 bg-[#0F172A] border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl shadow-black/30">
+        {/* Card Header */}
+        <div className="px-6 py-4 border-b border-slate-800/60 bg-[#0B1427]/50">
+          <div className="flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Gerenciar Imóveis</h2>
+          </div>
+        </div>
+
+        <div className="p-6">
+          {/* Ação: listar imóveis */}
+          {!listandoImoveis ? (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-bold text-white">Excluir imóvel da base de dados</p>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Selecione um imóvel para removê-lo permanentemente.
+                  <span className="text-amber-400/80 font-semibold"> Esta ação não pode ser desfeita.</span>
+                </p>
+              </div>
+              <button
+                onClick={carregarImoveis}
+                disabled={carregandoImoveis}
+                className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-slate-700/40 hover:bg-slate-700/70 text-slate-300 border border-slate-600/40 hover:border-slate-500/60 rounded-xl text-xs font-bold uppercase tracking-wide transition-all disabled:opacity-50"
+              >
+                {carregandoImoveis ? (
+                  <><div className="w-3 h-3 border-2 border-slate-400/30 border-t-slate-300 rounded-full animate-spin" /> Carregando...</>
+                ) : (
+                  <><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg> Selecionar Imóvel</>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{imoveisLista.length} imóvel(is) encontrado(s)</p>
+                <button
+                  onClick={() => { setListandoImoveis(false); setConfirmandoExclusaoId(null); setResultadoExclusao(null); }}
+                  className="text-xs text-slate-500 hover:text-slate-300 transition-colors underline underline-offset-2"
+                >
+                  Fechar lista
+                </button>
+              </div>
+
+              {imoveisLista.length === 0 ? (
+                <p className="text-slate-500 text-xs text-center py-6">Nenhum imóvel cadastrado.</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {imoveisLista.map((im) => (
+                    <div
+                      key={im.id}
+                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-[#0B1120] border border-slate-800/60"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        {im.capa ? (
+                          <img src={im.capa} alt={im.titulo} className="w-10 h-10 rounded-lg object-cover shrink-0 border border-slate-700" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-slate-800 shrink-0 flex items-center justify-center">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-600">
+                              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
+                            </svg>
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-white text-xs font-semibold truncate">{im.titulo}</p>
+                          <p className="text-slate-500 text-[10px] truncate">{im.bairro}{im.cidade ? `, ${im.cidade}` : ""}</p>
+                        </div>
+                      </div>
+
+                      {confirmandoExclusaoId === im.id ? (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <p className="text-[10px] text-amber-400 font-semibold hidden sm:block">Tem certeza?</p>
+                          <button
+                            onClick={() => setConfirmandoExclusaoId(null)}
+                            className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded-lg border border-slate-700 transition-all"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            onClick={() => excluirImovel(im.id)}
+                            disabled={excluindoId === im.id}
+                            className="px-2.5 py-1.5 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold rounded-lg transition-all disabled:opacity-50 flex items-center gap-1"
+                          >
+                            {excluindoId === im.id ? (
+                              <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                              <><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M18 6L6 18M6 6l12 12" /></svg> Confirmar</>
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setConfirmandoExclusaoId(im.id); setResultadoExclusao(null); }}
+                          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 hover:border-red-500/40 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all"
+                        >
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />
+                          </svg>
+                          Excluir
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Feedback exclusão */}
+          {resultadoExclusao && (
+            <div className={`mt-4 flex items-center gap-2.5 px-4 py-3 rounded-xl border text-xs font-semibold ${resultadoExclusao.tipo === "sucesso" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-400"}`}>
+              {resultadoExclusao.tipo === "sucesso" ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+              )}
+              {resultadoExclusao.msg}
             </div>
           )}
         </div>

@@ -1,8 +1,8 @@
+import os
 from django.db import models
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image
 from io import BytesIO
-import sys
 
 class Imovel(models.Model):
     TIPO_IMOVEL_CHOICES = [
@@ -54,41 +54,55 @@ class ImagemImovel(models.Model):
     is_capa = models.BooleanField(default=False)
     criado_em = models.DateTimeField(auto_now_add=True)
 
+    # Dimensões máximas por tipo de imagem
+    MAX_CAPA    = (1600, 900)   # capa: widescreen, aparece grande no site
+    MAX_GALERIA = (1280, 960)   # galeria: menor, carrega mais rápido
+
     def save(self, *args, **kwargs):
-        # Só faz a compressão se a imagem estiver sendo criada pela primeira vez
-        if self.imagem and not self.id:
-            # 1. Abre a imagem enviada pelo usuário
-            img = Image.open(self.imagem)
+        # Só comprime na criação (nunca re-processa imagem já salva no S3)
+        if self.imagem and not self.pk:
+            self.imagem = self._comprimir(self.imagem, self.is_capa)
+        super().save(*args, **kwargs)
 
-            # 2. Converte para RGB (Evita erros com imagens PNG transparentes que serão JPG)
-            if img.mode in ("RGBA", "P"):
-                img = img.convert("RGB")
+    def _comprimir(self, arquivo, is_capa):
+        img = Image.open(arquivo)
 
-            # 3. Redimensiona caso seja gigante (Limite de 1280px mantendo a proporção)
-            max_size = (1280, 1280)
-            img.thumbnail(max_size, Image.Resampling.LANCZOS)
+        # Remove metadados EXIF (GPS, modelo do celular, data, etc.)
+        # Isso reduz o tamanho e protege a privacidade do fotógrafo
+        img_sem_exif = Image.new(img.mode, img.size)
+        img_sem_exif.putdata(list(img.getdata()))
+        img = img_sem_exif
 
-            # 4. Cria um espaço na memória para salvar a nova versão
-            output = BytesIO()
-            
-            # 5. Salva a imagem comprimida na memória (Qualidade 75 é o padrão ouro de web)
-            img.save(output, format='JPEG', quality=75, optimize=True)
-            output.seek(0)
+        # Converte para RGB — necessário para salvar como JPEG
+        # (PNG com transparência, WEBP, paleta indexada, etc.)
+        if img.mode != "RGB":
+            img = img.convert("RGB")
 
-            # 6. Troca o arquivo original pesado pelo nosso arquivo leve recém-criado
-            nome_arquivo = f"{self.imagem.name.split('.')[0]}.jpg"
-            
-            self.imagem = InMemoryUploadedFile(
-                output, 
-                'ImageField', 
-                nome_arquivo, 
-                'image/jpeg',
-                sys.getsizeof(output), 
-                None
-            )
+        # Redimensiona respeitando a proporção original (nunca estica)
+        max_size = self.MAX_CAPA if is_capa else self.MAX_GALERIA
+        img.thumbnail(max_size, Image.Resampling.LANCZOS)
 
-        # Continua o processo normal de salvamento do Django (agora mandando o arquivo leve pro S3)
-        super(ImagemImovel, self).save(*args, **kwargs)
+        output = BytesIO()
+
+        # Progressive JPEG: o browser mostra a imagem inteira desfocada
+        # e vai focando aos poucos — percepção de carregamento muito mais rápida
+        # Quality 82: ponto ideal para imóveis (qualidade visual alta, arquivo ~60% menor)
+        img.save(output, format='JPEG', quality=82, optimize=True, progressive=True)
+        output.seek(0)
+
+        # Nome seguro: pega só o nome do arquivo, sem extensão, e força .jpg
+        nome_base = os.path.splitext(os.path.basename(arquivo.name))[0]
+        nome_arquivo = f"{nome_base}.jpg"
+        tamanho_real = output.getbuffer().nbytes  # tamanho correto em bytes
+
+        return InMemoryUploadedFile(
+            output,
+            'ImageField',
+            nome_arquivo,
+            'image/jpeg',
+            tamanho_real,
+            None,
+        )
 
     def __str__(self):
         return f"Foto de: {self.imovel.titulo}"

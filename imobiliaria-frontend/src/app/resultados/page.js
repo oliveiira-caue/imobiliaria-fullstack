@@ -118,8 +118,10 @@ function MapaGoogle({ imoveis }) {
         defaultCenter={centro}
         defaultZoom={imoveisComGps.length > 0 ? 13 : 12}
         disableDefaultUI={false}
+        streetViewControl={false}
         gestureHandling="greedy"
         style={{ width: "100%", height: "100%" }}
+        onClick={() => setMarcadorAberto(null)}
       >
         {imoveisComGps.map((im, idx) => {
           const pos = { lat: Number(im.latitude), lng: Number(im.longitude) };
@@ -132,18 +134,12 @@ function MapaGoogle({ imoveis }) {
               title={im.titulo}
               onClick={() => setMarcadorAberto(aberto ? null : (im.id ?? idx))}
             >
-              {/* Pin personalizado dark-blue */}
-              <div className={`
-                relative flex items-center justify-center
-                w-9 h-9 rounded-full border-2 shadow-lg cursor-pointer
-                transition-transform duration-200
-                ${aberto
-                  ? "bg-blue-500 border-white scale-125 shadow-blue-500/60"
-                  : "bg-[#1e40af] border-blue-300 hover:scale-110 shadow-blue-900/60"
-                }
-              `}>
-                <span className="text-white text-[10px] font-extrabold">{idx + 1}</span>
-              </div>
+              <Pin
+                background={aberto ? "#dc2626" : "#ef4444"}
+                borderColor={aberto ? "#991b1b" : "#dc2626"}
+                glyphColor="#ffffff"
+                scale={aberto ? 1.3 : 1}
+              />
 
               {/* InfoWindow ao clicar */}
               {aberto && (
@@ -211,6 +207,7 @@ export default function ResultadosPage() {
   const [viewMode, setViewMode]     = useState("lista");
   const [carregando, setCarregando] = useState(true);
   const [cardDestacado, setCardDestacado] = useState(null);
+  const [mapaCarregado, setMapaCarregado] = useState(false);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("nexus_resultados_ia");
@@ -278,7 +275,7 @@ export default function ResultadosPage() {
               </div>
               <h1 className="text-2xl font-extrabold text-white">
                 {imoveis.length > 0
-                  ? `${imoveis.length} imóvel(is) encontrado${imoveis.length !== 1 ? "s" : ""}`
+                  ? `${imoveis.length} ${imoveis.length === 1 ? "imóvel encontrado" : "imóveis encontrados"}`
                   : "Nenhum imóvel encontrado"}
               </h1>
               {termoBusca && (
@@ -298,7 +295,7 @@ export default function ResultadosPage() {
                 <IconList className="w-3.5 h-3.5" /> Lista
               </button>
               <button
-                onClick={() => setViewMode("mapa")}
+                onClick={() => { setViewMode("mapa"); setMapaCarregado(true); }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
                   ${viewMode === "mapa" ? "bg-blue-600 text-white shadow-md shadow-blue-900/40" : "text-slate-400 hover:text-slate-200"}`}
               >
@@ -342,54 +339,54 @@ export default function ResultadosPage() {
                 <IconArrowLeft className="w-4 h-4" /> Tentar outra busca
               </button>
             </div>
-
-          ) : viewMode === "lista" ? (
-            /* ── GRID LISTA ───────────────────────────────────────── */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {imoveis.map((im, idx) => (
-                <CardImovel
-                  key={im.id ?? idx}
-                  imovel={im}
-                  destacado={cardDestacado === (im.id ?? idx)}
-                  onClick={() => setCardDestacado(im.id ?? idx)}
-                />
-              ))}
-            </div>
-
           ) : (
-            /* ── MAPA + SIDEBAR ───────────────────────────────────── */
-            <div className="flex flex-col lg:flex-row gap-5">
+            <>
+              {/* ── GRID LISTA — oculto via CSS quando no modo mapa ── */}
+              <div className={viewMode === "lista" ? "block" : "hidden"}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {imoveis.map((im, idx) => (
+                    <CardImovel
+                      key={im.id ?? idx}
+                      imovel={im}
+                      destacado={cardDestacado === (im.id ?? idx)}
+                      onClick={() => setCardDestacado(im.id ?? idx)}
+                    />
+                  ))}
+                </div>
+              </div>
 
-              {/* Mapa */}
-              <div className="flex-1 relative">
-                <MapaGoogle imoveis={imoveis} />
-
-                {/* Legenda de contagem GPS */}
-                {imoveis.filter(im => im.latitude && im.longitude).length > 0 && (
-                  <div className="mt-2 flex items-center gap-2 px-1">
-                    <div className="w-3 h-3 rounded-full bg-blue-600 border border-blue-300" />
-                    <span className="text-slate-500 text-[10px]">
-                      {imoveis.filter(im => im.latitude && im.longitude).length} imóvel(is) com GPS · Clique nos pins para ver detalhes
-                    </span>
+              {/* ── MAPA + SIDEBAR — renderizado uma vez, oculto via CSS quando em lista */}
+              {mapaCarregado && (
+                <div className={viewMode === "mapa" ? "block" : "hidden"}>
+                  <div className="flex flex-col lg:flex-row gap-5">
+                    <div className="flex-1 relative">
+                      <MapaGoogle imoveis={imoveis} />
+                      {imoveis.filter(im => im.latitude && im.longitude).length > 0 && (
+                        <div className="mt-2 flex items-center gap-2 px-1">
+                          <div className="w-3 h-3 rounded-full bg-blue-600 border border-blue-300" />
+                          <span className="text-slate-500 text-[10px]">
+                            {(() => { const n = imoveis.filter(im => im.latitude && im.longitude).length; return `${n} ${n === 1 ? "imóvel" : "imóveis"} com GPS`; })()} · Clique nos pins para ver detalhes
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="w-full lg:w-64 flex-shrink-0 space-y-3 max-h-[480px] overflow-y-auto pr-1">
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">
+                        {imoveis.length} resultado(s)
+                      </p>
+                      {imoveis.map((im, idx) => (
+                        <CardImovel
+                          key={im.id ?? idx}
+                          imovel={im}
+                          destacado={cardDestacado === (im.id ?? idx)}
+                          onClick={() => setCardDestacado(im.id ?? idx)}
+                        />
+                      ))}
+                    </div>
                   </div>
-                )}
-              </div>
-
-              {/* Sidebar de cards */}
-              <div className="w-full lg:w-64 flex-shrink-0 space-y-3 max-h-[480px] overflow-y-auto pr-1">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-1">
-                  {imoveis.length} resultado(s)
-                </p>
-                {imoveis.map((im, idx) => (
-                  <CardImovel
-                    key={im.id ?? idx}
-                    imovel={im}
-                    destacado={cardDestacado === (im.id ?? idx)}
-                    onClick={() => setCardDestacado(im.id ?? idx)}
-                  />
-                ))}
-              </div>
-            </div>
+                </div>
+              )}
+            </>
           )}
         </main>
 

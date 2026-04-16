@@ -44,9 +44,20 @@ body {
   animation: step-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+/* Cursor mãozinha em todos os elementos clicáveis */
+button,
+a,
+[role="button"],
+label[for],
+select,
+summary {
+  cursor: pointer;
+}
+
 /* Desabilita zoom/scale do animate-in do Tailwind nas trocas de aba */
 [class*="animate-in"] {
   --tw-enter-scale: 1 !important;
   --tw-enter-translate-x: 0 !important;
   --tw-enter-translate-y: 0 !important;
 }
+
