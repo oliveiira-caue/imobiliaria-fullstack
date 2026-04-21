@@ -5,8 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { APIProvider, Map, AdvancedMarker, InfoWindow, Pin } from "@vis.gl/react-google-maps";
 
-const API        = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const MAPS_KEY   = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+const API       = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const MAPS_KEY  = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 const MAPS_MAP_ID = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID;
 
 const BELEM = { lat: -1.455, lng: -48.480 };
@@ -33,15 +33,6 @@ const IconList = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
-const IconSparkles = ({ className = "w-4 h-4" }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
-    <path strokeLinecap="round" strokeLinejoin="round"
-      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-    <path strokeLinecap="round" strokeLinejoin="round"
-      d="M18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-  </svg>
-);
-
 const IconFunnel = ({ className = "w-4 h-4" }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
     <path strokeLinecap="round" strokeLinejoin="round"
@@ -55,7 +46,13 @@ const IconArrowLeft = ({ className = "w-4 h-4" }) => (
   </svg>
 );
 
-/* ─── Utilitário ────────────────────────────────────────────────────────── */
+const IconX = ({ className = "w-3 h-3" }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
+/* ─── Utilitários ────────────────────────────────────────────────────────── */
 function formatarPreco(valor) {
   if (!valor) return "Sob consulta";
   return Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -72,47 +69,54 @@ function matchMinimo(valorParam, campoImovel) {
 /* ─── Card de imóvel ────────────────────────────────────────────────────── */
 function CardImovel({ imovel, destacado, onClick }) {
   return (
-    <article
-      onClick={onClick}
-      className={`group cursor-pointer bg-white border rounded-xl overflow-hidden
-        hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100
-        transition-all duration-300
-        ${destacado ? "border-blue-500 shadow-lg shadow-blue-100" : "border-slate-200"}`}
-    >
-      <div className="relative h-36 bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
-        {imovel.capa ? (
-          <img
+    <Link href={`/imoveis/${imovel.id}`} className="block group">
+      <article
+        onClick={onClick}
+        className={`cursor-pointer bg-white border rounded-xl overflow-hidden
+          hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100
+          transition-all duration-300
+          ${destacado ? "border-blue-500 shadow-lg shadow-blue-100" : "border-slate-200"}`}
+      >
+        <div className="relative h-36 bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
+          {imovel.capa ? (
+            <img
             src={imovel.capa}
             alt={imovel.titulo}
             loading="lazy"
             decoding="async"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-        ) : (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-100/60 to-transparent" />
-            <IconHome className="absolute inset-0 m-auto w-10 h-10 text-slate-300" />
-          </>
-        )}
-        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 text-slate-700 text-[9px] font-semibold">
-          {imovel.tipo_imovel || "Imóvel"}
-        </span>
-        {imovel.latitude && imovel.longitude && (
-          <span className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-600/80 text-white text-[8px] font-bold">
-            <IconMapPin className="w-2 h-2" /> GPS
-          </span>
-        )}
-      </div>
-      <div className="p-3">
-        <h3 className="text-slate-800 font-bold text-xs mb-0.5 group-hover:text-blue-600 transition-colors line-clamp-1">
-          {imovel.titulo}
-        </h3>
-        <p className="text-slate-500 text-[9px] flex items-center gap-1 mb-1.5">
-          <IconMapPin className="w-2.5 h-2.5 text-slate-500" />{imovel.bairro || "—"}
-        </p>
-        <p className="text-blue-600 font-extrabold text-sm">{formatarPreco(imovel.preco)}</p>
-      </div>
-    </article>
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-100/60 to-transparent" />
+              <IconHome className="absolute inset-0 m-auto w-10 h-10 text-slate-300" />
+            </>
+          )}
+          <div className="absolute top-2 left-2 flex gap-1">
+            <span className="px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 text-slate-700 text-[9px] font-semibold">
+              {imovel.tipo_imovel || "Imóvel"}
+            </span>
+            <span className={`px-2 py-0.5 rounded-full text-white text-[9px] font-bold ${imovel.finalidade === "Aluguel" ? "bg-emerald-600/80" : "bg-blue-600/80"}`}>
+              {imovel.finalidade}
+            </span>
+          </div>
+          {imovel.latitude && imovel.longitude && (
+            <span className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-600/80 text-white text-[8px] font-bold">
+              <IconMapPin className="w-2 h-2" /> GPS
+            </span>
+          )}
+        </div>
+        <div className="p-3">
+          <h3 className="text-slate-800 font-bold text-xs mb-0.5 group-hover:text-blue-600 transition-colors line-clamp-1">
+            {imovel.titulo}
+          </h3>
+          <p className="text-slate-500 text-[9px] flex items-center gap-1 mb-1.5">
+            <IconMapPin className="w-2.5 h-2.5 text-slate-500" />{imovel.bairro || "—"}
+          </p>
+          <p className="text-blue-600 font-extrabold text-sm">{formatarPreco(imovel.preco)}</p>
+        </div>
+      </article>
+    </Link>
   );
 }
 
@@ -128,7 +132,6 @@ function MapaGoogle({ imoveis }) {
       !isNaN(lat) && !isNaN(lng) &&
       lat !== 0 && lng !== 0;
   });
-  console.log("[GPS DEBUG] imoveis recebidos:", imoveis.length, "| com GPS válido:", imoveisComGps.length);
 
   const centro = imoveisComGps.length > 0
     ? {
@@ -138,7 +141,7 @@ function MapaGoogle({ imoveis }) {
     : BELEM;
 
   return (
-    <div className="w-full h-[480px] rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-black/10 relative">
+    <div className="w-full h-[480px] rounded-2xl overflow-hidden border border-slate-200 shadow-xl shadow-slate-200/60 relative">
       <Map
         mapId={MAPS_MAP_ID}
         defaultCenter={centro}
@@ -150,7 +153,7 @@ function MapaGoogle({ imoveis }) {
         onClick={() => setMarcadorAberto(null)}
       >
         {imoveisComGps.map((im, idx) => {
-          const pos = { lat: Number(im.latitude), lng: Number(im.longitude) };
+          const pos = { lat: parseFloat(im.latitude), lng: parseFloat(im.longitude) };
           const aberto = marcadorAberto === (im.id ?? idx);
           return (
             <AdvancedMarker
@@ -167,14 +170,14 @@ function MapaGoogle({ imoveis }) {
               />
               {aberto && (
                 <InfoWindow position={pos} onCloseClick={() => setMarcadorAberto(null)} headerDisabled>
-                  <div style={{ background:"#0F172A", border:"1px solid #1e293b", borderRadius:"12px", padding:"12px", minWidth:"200px", color:"white", fontFamily:"sans-serif" }}>
+                  <div style={{ background: "#0F172A", border: "1px solid #1e293b", borderRadius: "12px", padding: "12px", minWidth: "200px", color: "white", fontFamily: "sans-serif" }}>
                     {im.capa && (
-                      <img src={im.capa} alt={im.titulo} style={{ width:"100%", height:"80px", objectFit:"cover", borderRadius:"8px", marginBottom:"8px" }} />
+                      <img src={im.capa} alt={im.titulo} style={{ width: "100%", height: "80px", objectFit: "cover", borderRadius: "8px", marginBottom: "8px" }} />
                     )}
-                    <p style={{ fontSize:"10px", color:"#64748b", textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:"2px" }}>{im.tipo_imovel}</p>
-                    <p style={{ fontSize:"13px", fontWeight:"bold", marginBottom:"4px", color:"white" }}>{im.titulo}</p>
-                    <p style={{ fontSize:"11px", color:"#94a3b8", marginBottom:"6px" }}>📍 {im.bairro}</p>
-                    <p style={{ fontSize:"14px", color:"#60a5fa", fontWeight:"800" }}>{formatarPreco(im.preco)}</p>
+                    <p style={{ fontSize: "10px", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "2px" }}>{im.tipo_imovel}</p>
+                    <p style={{ fontSize: "13px", fontWeight: "bold", marginBottom: "4px", color: "white" }}>{im.titulo}</p>
+                    <p style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "6px" }}>📍 {im.bairro}</p>
+                    <p style={{ fontSize: "14px", color: "#60a5fa", fontWeight: "800" }}>{formatarPreco(im.preco)}</p>
                   </div>
                 </InfoWindow>
               )}
@@ -183,10 +186,10 @@ function MapaGoogle({ imoveis }) {
         })}
       </Map>
       {imoveisComGps.length === 0 && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#080E1A]/90 gap-3">
-          <IconMapPin className="w-10 h-10 text-slate-700" />
-          <p className="text-slate-400 text-sm font-semibold">Nenhum imóvel com coordenadas GPS</p>
-          <p className="text-slate-600 text-xs max-w-xs text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/90 gap-3">
+          <IconMapPin className="w-10 h-10 text-slate-300" />
+          <p className="text-slate-500 text-sm font-semibold">Nenhum imóvel com coordenadas GPS</p>
+          <p className="text-slate-400 text-xs max-w-xs text-center">
             Cadastre latitude e longitude no painel admin para ver os pins no mapa.
           </p>
         </div>
@@ -204,7 +207,7 @@ function LoadingScreen() {
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
         </svg>
-        <p className="text-slate-500 text-sm font-medium">Carregando resultados...</p>
+        <p className="text-slate-500 text-sm font-medium">Buscando imóveis...</p>
       </div>
     </div>
   );
@@ -213,10 +216,10 @@ function LoadingScreen() {
 /* ════════════════════════════════════════════════════════════════════════════
    WRAPPER — obrigatório para useSearchParams no App Router
 ════════════════════════════════════════════════════════════════════════════ */
-export default function ResultadosPage() {
+export default function BuscaPage() {
   return (
     <Suspense fallback={<LoadingScreen />}>
-      <ResultadosConteudo />
+      <BuscaConteudo />
     </Suspense>
   );
 }
@@ -224,41 +227,30 @@ export default function ResultadosPage() {
 /* ════════════════════════════════════════════════════════════════════════════
    CONTEÚDO PRINCIPAL
 ════════════════════════════════════════════════════════════════════════════ */
-function ResultadosConteudo() {
-  const router      = useRouter();
+function BuscaConteudo() {
+  const router       = useRouter();
   const searchParams = useSearchParams();
 
-  const [dados,         setDados]         = useState(null);
-  const [viewMode,      setViewMode]      = useState("lista");
-  const [carregando,    setCarregando]    = useState(true);
+  const [imoveis,      setImoveis]      = useState([]);
+  const [carregando,   setCarregando]   = useState(true);
+  const [viewMode,     setViewMode]     = useState("lista");
   const [cardDestacado, setCardDestacado] = useState(null);
   const [mapaCarregado, setMapaCarregado] = useState(false);
-  const [modoFiltrado,  setModoFiltrado]  = useState(false);
+  const [etiquetas,    setEtiquetas]    = useState({});
 
   useEffect(() => {
-    const temFiltros = searchParams.size > 0;
-
-    if (temFiltros) {
-      setModoFiltrado(true);
-      buscarFiltrado();
-    } else {
-      const raw = sessionStorage.getItem("nexus_resultados_ia");
-      if (!raw) { router.replace("/"); return; }
-      const parsed = JSON.parse(raw);
-      setDados(parsed);
-      if (parsed.viewMode) setViewMode(parsed.viewMode);
-      setCarregando(false);
-    }
+    buscar();
   }, [searchParams]);
 
-  async function buscarFiltrado() {
+  async function buscar() {
+    setCarregando(true);
     try {
       const res  = await fetch(`${API}/api/imoveis/lista/`);
       const todos = await res.json();
 
       const finalidade = searchParams.get("finalidade");
-      const tiposStr   = searchParams.get("tipo");
-      const tipos      = tiposStr ? tiposStr.split(",") : [];
+      const tiposStr   = searchParams.getAll("tipo");
+      const tipos      = tiposStr.length > 0 ? tiposStr : [];
       const precoMin   = searchParams.get("preco_min");
       const precoMax   = searchParams.get("preco_max");
       const areaMin    = searchParams.get("area_min");
@@ -288,22 +280,24 @@ function ResultadosConteudo() {
         return true;
       });
 
-      const etiquetas = {};
-      if (finalidade)     etiquetas.Finalidade = finalidade;
-      if (tipos.length)   etiquetas.Tipo       = tipos.join(", ");
-      if (precoMin)       etiquetas["Preço mín."] = `R$ ${Number(precoMin).toLocaleString("pt-BR")}`;
-      if (precoMax)       etiquetas["Preço máx."] = `R$ ${Number(precoMax).toLocaleString("pt-BR")}`;
-      if (areaMin)        etiquetas["Área mín."]  = `${areaMin} m²`;
-      if (areaMax)        etiquetas["Área máx."]  = `${areaMax} m²`;
-      if (quartosP)       etiquetas.Quartos       = quartosP;
-      if (suitesP)        etiquetas.Suítes        = suitesP;
-      if (banheirosP)     etiquetas.Banheiros     = banheirosP;
-      if (vagasP)         etiquetas.Vagas         = vagasP;
-      if (termo)          etiquetas.Busca         = termo;
+      const tags = {};
+      if (finalidade)     tags.Finalidade         = finalidade;
+      if (tipos.length)   tags.Tipo               = tipos.join(", ");
+      if (precoMin)       tags["Preço mín."]       = `R$ ${Number(precoMin).toLocaleString("pt-BR")}`;
+      if (precoMax)       tags["Preço máx."]       = `R$ ${Number(precoMax).toLocaleString("pt-BR")}`;
+      if (areaMin)        tags["Área mín."]         = `${areaMin} m²`;
+      if (areaMax)        tags["Área máx."]         = `${areaMax} m²`;
+      if (quartosP)       tags.Quartos             = quartosP;
+      if (suitesP)        tags.Suítes              = suitesP;
+      if (banheirosP)     tags.Banheiros           = banheirosP;
+      if (vagasP)         tags.Vagas               = vagasP;
+      if (termo)          tags.Busca               = termo;
 
-      setDados({ imoveis: filtrados, filtros_entendidos: {}, termoBusca: termo || "", etiquetas });
+      setImoveis(filtrados);
+      setEtiquetas(tags);
     } catch {
-      setDados({ imoveis: [], filtros_entendidos: {}, termoBusca: "", etiquetas: {} });
+      setImoveis([]);
+      setEtiquetas({});
     } finally {
       setCarregando(false);
     }
@@ -311,18 +305,8 @@ function ResultadosConteudo() {
 
   if (carregando) return <LoadingScreen />;
 
-  const { imoveis = [], filtros_entendidos = {}, termoBusca = "", etiquetas = {} } = dados;
-
-  const LABELS_FILTROS = {
-    tipo_imovel:  "Tipo",
-    finalidade:   "Finalidade",
-    bairro:       "Bairro",
-    quartos:      "Quartos (mín.)",
-    preco_maximo: "Preço máx.",
-  };
-
-  const filtrosAtivos = Object.entries(filtros_entendidos).filter(([, v]) => v != null && v !== "");
-  const etiquetasAtivas = Object.entries(etiquetas);
+  const etiquetasAtivas  = Object.entries(etiquetas);
+  const temFiltros       = etiquetasAtivas.length > 0;
 
   return (
     <APIProvider apiKey={MAPS_KEY ?? ""}>
@@ -351,11 +335,9 @@ function ResultadosConteudo() {
           <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1.5">
-                {modoFiltrado
-                  ? <IconFunnel className="w-4 h-4 text-blue-400" />
-                  : <IconSparkles className="w-4 h-4 text-blue-400" />}
-                <p className="text-blue-400 text-xs font-semibold tracking-widest uppercase">
-                  {modoFiltrado ? "Resultados Filtrados" : "Resultado da Busca com IA"}
+                <IconFunnel className="w-4 h-4 text-blue-500" />
+                <p className="text-blue-500 text-xs font-semibold tracking-widest uppercase">
+                  {temFiltros ? "Resultados Filtrados" : "Todos os Imóveis"}
                 </p>
               </div>
               <h1 className="text-2xl font-extrabold text-slate-800">
@@ -363,10 +345,8 @@ function ResultadosConteudo() {
                   ? `${imoveis.length} ${imoveis.length === 1 ? "imóvel encontrado" : "imóveis encontrados"}`
                   : "Nenhum imóvel encontrado"}
               </h1>
-              {termoBusca && (
-                <p className="text-slate-500 text-xs mt-1">
-                  Para: <span className="text-slate-300 italic">"{termoBusca}"</span>
-                </p>
+              {!temFiltros && (
+                <p className="text-slate-500 text-xs mt-1">Exibindo todos os imóveis disponíveis</p>
               )}
             </div>
 
@@ -391,31 +371,23 @@ function ResultadosConteudo() {
             </div>
           </div>
 
-          {/* ─── ETIQUETAS DE FILTROS ─────────────────────────────────── */}
-          {modoFiltrado && etiquetasAtivas.length > 0 && (
+          {/* ─── ETIQUETAS DE FILTROS ATIVOS ──────────────────────────── */}
+          {temFiltros && (
             <div className="mb-6 flex flex-wrap gap-2 items-center">
-              <span className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">Filtros:</span>
+              <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Filtros:</span>
               {etiquetasAtivas.map(([chave, valor]) => (
                 <span key={chave}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-300 text-[10px] font-semibold">
-                  <span className="text-blue-500/60">{chave}:</span>{valor}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-semibold">
+                  <span className="text-blue-400">{chave}:</span>{valor}
                 </span>
               ))}
-            </div>
-          )}
-
-          {!modoFiltrado && filtrosAtivos.length > 0 && (
-            <div className="mb-6 flex flex-wrap gap-2 items-center">
-              <span className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">IA entendeu:</span>
-              {filtrosAtivos.map(([chave, valor]) => (
-                <span key={chave}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-300 text-[10px] font-semibold">
-                  <span className="text-blue-500/60">{LABELS_FILTROS[chave] ?? chave}:</span>
-                  {chave === "preco_maximo"
-                    ? Number(valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 })
-                    : valor}
-                </span>
-              ))}
+              <button
+                type="button"
+                onClick={() => router.push("/busca")}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 border border-slate-300 text-slate-500 text-[10px] font-semibold hover:bg-slate-200 transition-colors"
+              >
+                <IconX /> Limpar filtros
+              </button>
             </div>
           )}
 

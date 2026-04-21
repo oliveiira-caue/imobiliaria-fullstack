@@ -8,6 +8,8 @@ from .views import (
     LeadDetalheView,
     BuscaIAView,
     GeocodificarView,
+    UsuariosView,
+    UsuarioDetalheView,
 )
 
 urlpatterns = [
@@ -28,4 +30,8 @@ urlpatterns = [
 
     # Proxy de geocodificação (Nominatim via servidor)
     path('geocodificar/', GeocodificarView.as_view(), name='geocodificar'),
+
+    # Gerenciamento de usuários
+    path('usuarios/', UsuariosView.as_view(), name='usuarios'),
+    path('usuarios/<int:pk>/', UsuarioDetalheView.as_view(), name='usuario_detalhe'),
 ]

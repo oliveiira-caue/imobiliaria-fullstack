@@ -29,6 +29,16 @@ body {
   font-family: var(--font-sans), 'Inter', sans-serif;
 }
 
+@keyframes toast-in {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes toast-out {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(110%); opacity: 0; }
+}
+
 @keyframes step-enter {
   from {
     opacity: 0;
@@ -60,4 +70,71 @@ summary {
   --tw-enter-translate-x: 0 !important;
   --tw-enter-translate-y: 0 !important;
 }
+
+/* ── Tema Claro ─────────────────────────────────────────────────────────── */
+[data-tema="claro"] .bg-\[\#0B1120\],
+[data-tema="claro"].bg-\[\#0B1120\]  { background-color: #f8fafc; }
+
+[data-tema="claro"] .bg-\[\#080E1A\],
+[data-tema="claro"].bg-\[\#080E1A\]  { background-color: #f1f5f9; }
+
+[data-tema="claro"] .bg-\[\#0F172A\],
+[data-tema="claro"].bg-\[\#0F172A\]  { background-color: #ffffff; }
+
+[data-tema="claro"] .bg-\[\#0B1427\],
+[data-tema="claro"].bg-\[\#0B1427\]  { background-color: #f8fafc; }
+
+[data-tema="claro"] .bg-\[\#131f35\] { background-color: #e2e8f0; }
+
+[data-tema="claro"] .bg-\[\#0B1427\]\/50  { background-color: rgba(248,250,252,0.95); }
+[data-tema="claro"] .bg-\[\#080E1A\]\/90  { background-color: rgba(241,245,249,0.92); }
+[data-tema="claro"] .bg-\[\#080E1A\]\/60  { background-color: #f1f5f9; }
+[data-tema="claro"] .bg-\[\#080E1A\]\/50  { background-color: #f8fafc; }
+[data-tema="claro"] .bg-\[\#0F172A\]\/90  { background-color: rgba(255,255,255,0.90); }
+[data-tema="claro"] .bg-\[\#0F172A\]\/95  { background-color: rgba(255,255,255,0.95); }
+[data-tema="claro"] .bg-\[\#0B1120\]\/80  { background-color: rgba(248,250,252,0.80); }
+[data-tema="claro"] .bg-\[\#0B1120\]\/90  { background-color: rgba(248,250,252,0.90); }
+
+[data-tema="claro"] .text-white    { color: #0f172a; }
+[data-tema="claro"] .text-slate-200 { color: #1e293b; }
+[data-tema="claro"] .text-slate-300 { color: #334155; }
+
+[data-tema="claro"] .border-slate-800     { border-color: #e2e8f0; }
+[data-tema="claro"] .border-slate-800\/60 { border-color: rgba(226,232,240,0.60); }
+[data-tema="claro"] .border-slate-700     { border-color: #cbd5e1; }
+[data-tema="claro"] .border-slate-700\/40 { border-color: rgba(203,213,225,0.40); }
+
+[data-tema="claro"] .divide-slate-800 > * + * { border-color: #e2e8f0; }
+
+/* Slate dark backgrounds → light equivalents */
+[data-tema="claro"] .bg-slate-800        { background-color: #f1f5f9; }
+[data-tema="claro"] .bg-slate-900        { background-color: #f8fafc; }
+[data-tema="claro"] .bg-slate-800\/20    { background-color: rgba(241,245,249,0.50); }
+[data-tema="claro"] .bg-slate-800\/40    { background-color: #f1f5f9; }
+[data-tema="claro"] .bg-slate-800\/50    { background-color: #f1f5f9; }
+[data-tema="claro"] .bg-slate-800\/60    { background-color: #f1f5f9; }
+[data-tema="claro"] .bg-slate-800\/70    { background-color: #e2e8f0; }
+[data-tema="claro"] .bg-slate-800\/80    { background-color: #e2e8f0; }
+[data-tema="claro"] .bg-slate-700\/30    { background-color: #f1f5f9; }
+[data-tema="claro"] .bg-slate-700\/40    { background-color: #f1f5f9; }
+[data-tema="claro"] .bg-slate-700\/50    { background-color: #e2e8f0; }
+[data-tema="claro"] .bg-slate-700\/70    { background-color: #e2e8f0; }
+[data-tema="claro"] .bg-\[\#0B1427\]\/60 { background-color: #f1f5f9; }
+[data-tema="claro"] .bg-\[\#1E293B\]     { background-color: #eff6ff; }
+
+/* Border colours for slate-6xx/7xx */
+[data-tema="claro"] .border-slate-600    { border-color: #e2e8f0; }
+[data-tema="claro"] .border-slate-600\/30 { border-color: rgba(226,232,240,0.50); }
+[data-tema="claro"] .border-slate-600\/40 { border-color: rgba(226,232,240,0.60); }
+[data-tema="claro"] .border-slate-700\/40 { border-color: rgba(203,213,225,0.60); }
+[data-tema="claro"] .border-slate-700\/50 { border-color: rgba(203,213,225,0.60); }
+
+/* Hover overrides that reference dark slate */
+[data-tema="claro"] .hover\:bg-slate-700:hover { background-color: #e2e8f0; }
+[data-tema="claro"] .hover\:bg-slate-700\/50:hover { background-color: #e2e8f0; }
+[data-tema="claro"] .hover\:bg-slate-700\/70:hover { background-color: #e2e8f0; }
+[data-tema="claro"] .hover\:bg-\[\#131f35\]:hover  { background-color: #f1f5f9; }
+
+/* Text on dark slate → visible on light */
+[data-tema="claro"] .text-slate-300 { color: #475569; }
 

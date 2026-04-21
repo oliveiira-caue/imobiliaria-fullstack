@@ -8,7 +8,15 @@
       "Bash(powershell.exe -Command \"New-Item -ItemType Directory -Force -Path 'C:\\\\Users\\\\Cauê\\\\Documents\\\\WindowsPowerShell'\")",
       "Bash(powershell.exe -Command \"Get-ExecutionPolicy -Scope CurrentUser\")",
       "Bash(python -c \"from imoveis.models import ImagemImovel; print\\('OK'\\)\")",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(venv/Scripts/python manage.py migrate)",
+      "Bash(venv/Scripts/python manage.py shell -c \"from django.contrib.auth.models import User; u = User.objects.filter\\(username='admin'\\).first\\(\\); print\\('exists:', bool\\(u\\)\\); print\\('has_usable_password:', u.has_usable_password\\(\\) if u else 'N/A'\\)\")",
+      "Bash(venv/Scripts/python manage.py shell -c \"from django.contrib.auth.models import User; from django.contrib.auth import authenticate; u = authenticate\\(username='admin', password='83146948'\\); print\\('auth result:', u\\)\")",
+      "Bash(venv/Scripts/python manage.py shell -c \"from django.contrib.auth.models import User; u = User.objects.get\\(username='admin'\\); u.set_password\\('83146948'\\); u.save\\(\\); print\\('Senha corrigida com sucesso!'\\)\")",
+      "Bash(venv/Scripts/python manage.py shell -c \"from django.contrib.auth import authenticate; u = authenticate\\(username='admin', password='83146948'\\); print\\('Login OK:', bool\\(u\\)\\)\")",
+      "Bash(venv/Scripts/python manage.py shell -c \"from django.contrib.auth.models import User; users = User.objects.all\\(\\).values\\('id','username','email'\\); print\\(list\\(users\\)\\)\")",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(start cmd *)"
     ]
   }
 }

@@ -18,7 +18,7 @@ export default function LoginAdmin() {
     setCarregando(true);
 
     try {
-      const resposta = await fetch("http://localhost:8000/api/token/", {
+      const resposta = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/token/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: email, password: senha }),
@@ -27,7 +27,7 @@ export default function LoginAdmin() {
       const dados = await resposta.json();
 
       if (resposta.ok) {
-        localStorage.setItem("tokenImobiliaria", dados.token);
+        sessionStorage.setItem("tokenImobiliaria", dados.access);
 
         router.push("/admin/dashboard");
       } else {
@@ -58,7 +58,7 @@ export default function LoginAdmin() {
 
         <form onSubmit={fazerLogin} className="space-y-5">
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">E-mail</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Usuário ou E-mail</label>
             <input
               type="text"
               value={email}

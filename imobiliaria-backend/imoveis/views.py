@@ -9,6 +9,9 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.db.models import Prefetch
+from rest_framework_simplejwt.tokens import AccessToken
 from .models import Imovel, ImagemImovel, Lead
 
 # ─── Helper ────────────────────────────────────────────────────────────────
@@ -72,7 +75,26 @@ class ImovelCriarView(APIView):
 
 class ImovelListaView(APIView):
     def get(self, request):
-        imoveis = Imovel.objects.all().order_by('-id')
+        # prefetch_related faz apenas 2 queries no total (imoveis + capas)
+        # e usa o .url nativo do ImageField — correto com qualquer MEDIA_URL
+        imoveis = (
+            Imovel.objects
+            .prefetch_related(
+                Prefetch(
+                    'galeria',
+                    queryset=ImagemImovel.objects.filter(is_capa=True),
+                    to_attr='capas_prefetch',
+                )
+            )
+            .order_by('-id')
+        )
+
+        def capa_url(im):
+            capas = getattr(im, 'capas_prefetch', [])
+            if capas and capas[0].imagem:
+                return request.build_absolute_uri(capas[0].imagem.url)
+            return None
+
         dados = [
             {
                 "id": im.id,
@@ -84,15 +106,17 @@ class ImovelListaView(APIView):
                 "preco": im.preco,
                 "area_util": im.area_util,
                 "quartos": im.quartos,
+                "suites": im.suites,
                 "banheiros": im.banheiros,
                 "vagas": im.vagas,
-                "capa": _capa_url(request, im),
+                "latitude": im.latitude,
+                "longitude": im.longitude,
+                "capa": capa_url(im),
                 "ativo": im.ativo,
             }
             for im in imoveis
         ]
         return Response(dados, status=status.HTTP_200_OK)
-
 
 class ImovelDetalhesView(APIView):
     def get(self, request, pk):
@@ -200,28 +224,30 @@ class LeadListaView(APIView):
                 nome_imovel = imovel.titulo if imovel else "Contato Geral"
                 mensagem_html = f"""
                 <html>
-                    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px;">
-                        <div style="background-color: #0F172A; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
-                            <h2 style="color: #3B82F6; margin: 0;">Nexus Habitar</h2>
-                            <p style="color: #94A3B8; margin: 5px 0 0 0;">Novo Lead Recebido</p>
-                        </div>
-                        <div style="padding: 20px; border: 1px solid #E2E8F0; border-radius: 0 0 8px 8px;">
-                            <p><strong>Nome:</strong> {novo_lead.nome}</p>
-                            <p><strong>Telefone:</strong> {novo_lead.telefone}</p>
-                            <p><strong>E-mail:</strong> {novo_lead.email}</p>
-                            <p><strong>Melhor Horário:</strong> {novo_lead.melhor_horario}</p>
-                            <p><strong>Meio de Contato:</strong> {novo_lead.meio_contato}</p>
-                            <p><strong>Imóvel:</strong> {nome_imovel}</p>
-                            <div style="background-color: #F8FAFC; padding: 15px; border-left: 4px solid #3B82F6; margin-top: 20px; border-radius: 4px;">
-                                <strong>Mensagem:</strong><br>
-                                <span style="color: #475569;">{novo_lead.mensagem or "Nenhuma mensagem."}</span>
+                    <body style="font-family: Arial, sans-serif; background-color: #0B1120; margin: 0; padding: 20px;">
+                        <div style="max-width: 600px; margin: 0 auto; background-color: #0F172A; border-radius: 12px; overflow: hidden; border: 1px solid #1E293B;">
+                            <div style="background-color: #0F172A; padding: 24px 20px; text-align: center; border-bottom: 1px solid #1E293B;">
+                                <h2 style="color: #3B82F6; margin: 0; font-size: 22px; letter-spacing: 0.5px;">Nexus Habitar</h2>
+                                <p style="color: #64748B; margin: 6px 0 0 0; font-size: 13px;">Novo Lead Recebido</p>
+                            </div>
+                            <div style="padding: 24px 20px; color: #CBD5E1; line-height: 1.8; font-size: 14px;">
+                                <p style="margin: 0 0 10px 0;"><span style="color: #64748B; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Nome</span><br><strong style="color: #F1F5F9;">{novo_lead.nome}</strong></p>
+                                <p style="margin: 0 0 10px 0;"><span style="color: #64748B; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Telefone</span><br><strong style="color: #F1F5F9;">{novo_lead.telefone}</strong></p>
+                                <p style="margin: 0 0 10px 0;"><span style="color: #64748B; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">E-mail</span><br><strong style="color: #F1F5F9;">{novo_lead.email or "—"}</strong></p>
+                                <p style="margin: 0 0 10px 0;"><span style="color: #64748B; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Data/Hora da Visita</span><br><strong style="color: #3B82F6;">{novo_lead.melhor_horario or "—"}</strong></p>
+                                <p style="margin: 0 0 10px 0;"><span style="color: #64748B; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Meio de Contato</span><br><strong style="color: #F1F5F9;">{novo_lead.meio_contato or "—"}</strong></p>
+                                <p style="margin: 0 0 16px 0;"><span style="color: #64748B; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Imóvel</span><br><strong style="color: #F1F5F9;">{nome_imovel}</strong></p>
+                                <div style="background-color: #0B1120; padding: 14px 16px; border-left: 3px solid #3B82F6; border-radius: 4px;">
+                                    <span style="color: #64748B; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">Mensagem</span><br>
+                                    <span style="color: #94A3B8; font-size: 13px;">{novo_lead.mensagem or "Nenhuma mensagem."}</span>
+                                </div>
                             </div>
                         </div>
                     </body>
                 </html>
                 """
                 send_mail(
-                    subject=f"🔥 NOVO LEAD: {novo_lead.nome} - {nome_imovel}",
+                    subject=f"NOVO LEAD: {novo_lead.nome} - {nome_imovel}",
                     message="Novo lead recebido.",
                     html_message=mensagem_html,
                     from_email=settings.EMAIL_HOST_USER,
@@ -345,3 +371,72 @@ class BuscaIAView(APIView):
             for im in imoveis
         ]
         return Response({"filtros_entendidos": filtros, "imoveis": dados}, status=status.HTTP_200_OK)
+
+
+# -------------------------------------------------------------------
+# VIEWS DE GERENCIAMENTO DE USUÁRIOS
+# -------------------------------------------------------------------
+USUARIO_PROTEGIDO = "admin"
+
+def _autenticar_token(request):
+    token_str = request.META.get('HTTP_X_AUTH_TOKEN', '')
+    if not token_str:
+        return None
+    try:
+        token = AccessToken(token_str)
+        return User.objects.get(id=token['user_id'])
+    except Exception:
+        return None
+
+
+class UsuariosView(APIView):
+    def get(self, request):
+        if not _autenticar_token(request):
+            return Response({"erro": "Não autorizado."}, status=status.HTTP_401_UNAUTHORIZED)
+        usuarios = list(
+            User.objects.all().order_by('id').values(
+                'id', 'username', 'is_staff', 'is_superuser', 'date_joined', 'last_login'
+            )
+        )
+        for u in usuarios:
+            u['protegido'] = u['username'] == USUARIO_PROTEGIDO
+        return Response(usuarios, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        if not _autenticar_token(request):
+            return Response({"erro": "Não autorizado."}, status=status.HTTP_401_UNAUTHORIZED)
+        username = request.data.get('username', '').strip()
+        password = request.data.get('password', '').strip()
+        email = request.data.get('email', '').strip()
+        is_staff = request.data.get('is_staff', True)
+        if not username or not password:
+            return Response({"erro": "Usuário e senha são obrigatórios."}, status=status.HTTP_400_BAD_REQUEST)
+        if len(password) < 6:
+            return Response({"erro": "A senha deve ter ao menos 6 caracteres."}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(username=username).exists():
+            return Response({"erro": f'Usuário "{username}" já existe.'}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.create_user(username=username, password=password, email=email, is_staff=bool(is_staff))
+        return Response({"mensagem": f'Usuário "{username}" criado com sucesso!', "id": user.id}, status=status.HTTP_201_CREATED)
+
+
+class UsuarioDetalheView(APIView):
+    def delete(self, request, pk):
+        if not _autenticar_token(request):
+            return Response({"erro": "Não autorizado."}, status=status.HTTP_401_UNAUTHORIZED)
+        user = get_object_or_404(User, pk=pk)
+        if user.username == USUARIO_PROTEGIDO:
+            return Response({"erro": f'O usuário "{USUARIO_PROTEGIDO}" é protegido e não pode ser excluído.'}, status=status.HTTP_403_FORBIDDEN)
+        username = user.username
+        user.delete()
+        return Response({"mensagem": f'Usuário "{username}" excluído com sucesso!'}, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):
+        if not _autenticar_token(request):
+            return Response({"erro": "Não autorizado."}, status=status.HTTP_401_UNAUTHORIZED)
+        user = get_object_or_404(User, pk=pk)
+        nova_senha = request.data.get('password', '').strip()
+        if not nova_senha or len(nova_senha) < 6:
+            return Response({"erro": "Nova senha deve ter ao menos 6 caracteres."}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(nova_senha)
+        user.save()
+        return Response({"mensagem": f'Senha de "{user.username}" atualizada com sucesso!'}, status=status.HTTP_200_OK)
