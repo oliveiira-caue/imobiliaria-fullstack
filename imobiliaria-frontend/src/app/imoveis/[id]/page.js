@@ -73,13 +73,13 @@ const labelClass = "block text-[10px] font-bold text-slate-400 uppercase trackin
 /* ─── Skeleton ──────────────────────────────────────────────────────────── */
 function Skeleton() {
   return (
-    <div className="min-h-screen bg-white animate-pulse">
-      <div className="h-14 bg-slate-100 border-b border-slate-200" />
+    <div className="min-h-screen bg-[#070d1a] animate-pulse">
+      <div className="h-14 bg-white/5 border-b border-white/8" />
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        <div className="h-72 bg-slate-200 rounded-2xl" />
+        <div className="h-72 bg-white/5 rounded-2xl" />
         <div className="grid grid-cols-3 gap-4">
-          <div className="h-4 bg-slate-200 rounded col-span-2" />
-          <div className="h-4 bg-slate-200 rounded" />
+          <div className="h-4 bg-white/5 rounded col-span-2" />
+          <div className="h-4 bg-white/5 rounded" />
         </div>
       </div>
     </div>
@@ -155,10 +155,10 @@ export default function DetalheImovelPage() {
 
   if (loading) return <Skeleton />;
   if (notFound) return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 text-center px-4">
-      <p className="text-5xl font-black text-slate-300">404</p>
-      <h1 className="text-slate-800 font-bold text-xl">Imóvel não encontrado</h1>
-      <Link href="/" className="text-blue-600 hover:text-blue-500 text-sm font-medium underline">← Voltar para a Home</Link>
+    <div className="min-h-screen bg-[#070d1a] flex flex-col items-center justify-center gap-4 text-center px-4">
+      <p className="text-5xl font-black text-slate-600">404</p>
+      <h1 className="text-white font-bold text-xl">Imóvel não encontrado</h1>
+      <Link href="/" className="text-blue-400 hover:text-blue-300 text-sm font-medium underline">← Voltar para a Home</Link>
     </div>
   );
 
@@ -172,15 +172,15 @@ export default function DetalheImovelPage() {
   const hrefWhatsApp = `https://wa.me/${telWhatsApp}?text=${msgWhatsApp}`;
 
   return (
-    <div className="min-h-screen bg-white text-slate-800">
+    <div className="min-h-screen bg-[#070d1a] text-white">
 
       {/* ─── HEADER ────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200">
+      <header className="sticky top-0 z-40 bg-[#070d1a]/95 backdrop-blur-xl border-b border-white/8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <Link href="/" className="flex-shrink-0">
             <Image src="/logo_nome.png" alt="Nexus Habitar" width={160} height={50} className="h-8 w-auto object-contain opacity-90" />
           </Link>
-          <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs font-semibold transition-colors">
+          <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-400 hover:text-white text-xs font-semibold transition-colors">
             <IconArrowLeft /> Voltar
           </button>
         </div>
@@ -265,7 +265,7 @@ export default function DetalheImovelPage() {
                   {imovel.finalidade}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-tight mb-2">{imovel.titulo}</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight mb-2">{imovel.titulo}</h1>
               <p className="text-slate-400 text-sm flex items-center gap-1.5">
                 <IconMapPin />
                 {[imovel.endereco, imovel.numero, imovel.bairro, imovel.cidade].filter(Boolean).join(", ")}
@@ -281,11 +281,11 @@ export default function DetalheImovelPage() {
                 { icon: <IconCar />,       label: "Vagas",     valor: imovel.vagas      },
                 { icon: <IconArea />, label: "Área", valor: imovel.area_util ? `${imovel.area_util} m²` : "—" },
               ].filter(d => d.valor != null && d.valor !== 0 && d.valor !== "0").map(({ icon, label, valor }) => (
-                <div key={label} className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-2">
-                  <span className="text-blue-600">{icon}</span>
+                <div key={label} className="bg-[#0e1829] border border-white/8 rounded-xl p-3 flex items-center gap-2">
+                  <span className="text-blue-400">{icon}</span>
                   <div>
                     <p className="text-[9px] text-slate-500 uppercase tracking-wider">{label}</p>
-                    <p className="text-blue-600 font-extrabold text-sm">{valor}</p>
+                    <p className="text-blue-400 font-extrabold text-sm">{valor}</p>
                   </div>
                 </div>
               ))}
@@ -293,20 +293,20 @@ export default function DetalheImovelPage() {
 
             {/* Descrição */}
             {imovel.descricao && (
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
-                <h2 className="text-slate-700 font-bold text-sm mb-3 uppercase tracking-widest text-[10px]">Descrição</h2>
-                <p className="text-slate-600 text-sm leading-relaxed whitespace-pre-line">{imovel.descricao}</p>
+              <div className="bg-[#0e1829] border border-white/8 rounded-2xl p-5">
+                <h2 className="text-slate-400 font-bold text-sm mb-3 uppercase tracking-widest text-[10px]">Descrição</h2>
+                <p className="text-slate-300 text-sm leading-relaxed whitespace-pre-line">{imovel.descricao}</p>
               </div>
             )}
 
             {/* Comodidades */}
             {comodidades.length > 0 && (
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+              <div className="bg-[#0e1829] border border-white/8 rounded-2xl p-5">
                 <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Comodidades</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {comodidades.map((c) => (
-                    <div key={c} className="flex items-center gap-2 text-slate-700 text-xs">
-                      <span className="text-blue-600"><IconCheck /></span>
+                    <div key={c} className="flex items-center gap-2 text-slate-300 text-xs">
+                      <span className="text-blue-400"><IconCheck /></span>
                       {c}
                     </div>
                   ))}
@@ -319,9 +319,9 @@ export default function DetalheImovelPage() {
           <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
 
             {/* Preço + botões */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div className="bg-[#0e1829] border border-white/8 rounded-2xl p-5">
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Valor</p>
-              <p className="text-3xl font-black text-blue-600 mb-1">{formatarPreco(imovel.preco)}</p>
+              <p className="text-3xl font-black text-blue-400 mb-1">{formatarPreco(imovel.preco)}</p>
               {imovel.valor_condominio > 0 && (
                 <p className="text-slate-500 text-xs">Condomínio: {formatarPreco(imovel.valor_condominio)}/mês</p>
               )}
@@ -329,7 +329,7 @@ export default function DetalheImovelPage() {
                 <p className="text-slate-500 text-xs">IPTU: {formatarPreco(imovel.iptu)}/ano</p>
               )}
 
-              <div className="border-t border-slate-200 mt-4 pt-4 flex flex-col gap-3">
+              <div className="border-t border-white/8 mt-4 pt-4 flex flex-col gap-3">
                 {leadOk ? (
                   <div className="flex flex-col items-center gap-3 py-4 text-center">
                     <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
@@ -338,7 +338,7 @@ export default function DetalheImovelPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-slate-800 font-bold text-sm">Visita agendada!</p>
+                      <p className="text-white font-bold text-sm">Visita agendada!</p>
                       <p className="text-slate-400 text-xs mt-0.5">Entraremos em contato para confirmar.</p>
                     </div>
                     <button onClick={() => setLeadOk(false)} className="text-blue-400 hover:text-blue-300 text-xs underline">
@@ -563,10 +563,10 @@ export default function DetalheImovelPage() {
       )}
 
       {/* ─── FOOTER ─────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-slate-200 bg-slate-50 mt-16">
+      <footer className="border-t border-white/8 bg-[#070d1a] mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <Image src="/logo_nome.png" alt="Nexus Habitar" width={160} height={50} className="h-6 w-auto object-contain opacity-50" />
-          <p className="text-slate-400 text-xs">© {new Date().getFullYear()} Nexus Habitar</p>
+          <p className="text-slate-600 text-xs">© {new Date().getFullYear()} Nexus Habitar</p>
         </div>
       </footer>
     </div>

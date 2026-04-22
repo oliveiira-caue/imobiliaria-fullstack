@@ -872,6 +872,25 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── ESTATÍSTICAS ────────────────────────────────────────────────── */}
+      <section className="bg-[#070d1a] border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+            {[
+              { valor: "320+", label: "Imóveis cadastrados" },
+              { valor: "R$ 480M", label: "Em imóveis negociados" },
+              { valor: "140+", label: "Clientes atendidos" },
+              { valor: "98%", label: "Taxa de satisfação" },
+            ].map(({ valor, label }) => (
+              <div key={label}>
+                <p className="text-white font-extrabold text-2xl sm:text-3xl">{valor}</p>
+                <p className="text-slate-500 text-xs mt-1">{label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── PAINEL DE FILTROS ───────────────────────────────────────────── */}
       {filtrosAbertos && (
         <PainelFiltros
