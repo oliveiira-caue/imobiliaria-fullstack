@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -18,7 +19,6 @@ const IconMapPin = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
   </svg>
 );
-/* Cama — quartos (mesmo SVG do dashboard) */
 const IconBed = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
     <path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8" />
@@ -26,7 +26,6 @@ const IconBed = () => (
     <path d="M12 4v6" /><path d="M2 18h20" />
   </svg>
 );
-/* Suítes — cama com marcador central (mesmo SVG do dashboard) */
 const IconBedDouble = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
     <path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8" />
@@ -35,7 +34,6 @@ const IconBedDouble = () => (
     <circle cx="12" cy="15" r="1" fill="currentColor" />
   </svg>
 );
-/* Banheiro (mesmo SVG do dashboard) */
 const IconBath = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" />
@@ -45,14 +43,12 @@ const IconBath = () => (
     <line x1="17" x2="17" y1="19" y2="21" />
   </svg>
 );
-/* Carro — vagas (mesmo SVG do dashboard) */
 const IconCar = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
     <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
     <circle cx="7" cy="17" r="2" /><path d="M9 17h6" /><circle cx="17" cy="17" r="2" />
   </svg>
 );
-/* Área — setas de expansão diagonal (mesmo SVG do dashboard) */
 const IconArea = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
     <polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" />
@@ -69,7 +65,7 @@ const formatarPreco = (v) =>
   v ? Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }) : "Sob consulta";
 
 const inputClass =
-  "w-full bg-[#080E1A] border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-600 " +
+  "w-full bg-[#080E1A] border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white placeholder-slate-600 " +
   "focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40 transition-all";
 
 const labelClass = "block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5";
@@ -97,12 +93,12 @@ export default function DetalheImovelPage() {
   const { id } = useParams();
   const router  = useRouter();
 
-  const [imovel, setImovel]     = useState(null);
-  const [loading, setLoading]   = useState(true);
-  const [fotoIdx, setFotoIdx]   = useState(0); // índice da foto grande
-  const [notFound, setNotFound] = useState(false);
+  const [imovel, setImovel]         = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [fotoIdx, setFotoIdx]       = useState(0);
+  const [notFound, setNotFound]     = useState(false);
+  const [lightboxAberto, setLightboxAberto] = useState(false);
 
-  // ── Formulário de lead ─────────────────────────────────────────────────
   const [modalAberto, setModalAberto] = useState(false);
   const [lead, setLead] = useState({
     nome: "", email: "", telefone: "", mensagem: "",
@@ -112,14 +108,11 @@ export default function DetalheImovelPage() {
   const [leadOk, setLeadOk]       = useState(false);
   const [erroLead, setErroLead]   = useState("");
 
-  const hoje = new Date().toISOString().split("T")[0];
-
   const fecharModal = () => {
     setModalAberto(false);
     if (!leadOk) setErroLead("");
   };
 
-  // ── Busca dados do imóvel ─────────────────────────────────────────────
   useEffect(() => {
     if (!id) return;
     fetch(`${API}/api/imoveis/${id}/`)
@@ -129,7 +122,6 @@ export default function DetalheImovelPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // ── Envia lead ────────────────────────────────────────────────────────
   const handleLead = async (e) => {
     e.preventDefault();
     setErroLead("");
@@ -170,11 +162,14 @@ export default function DetalheImovelPage() {
     </div>
   );
 
-  // Monta galeria: capa + galeria
   const todasFotos = [imovel.capa, ...(imovel.fotos_galeria?.map(f => f.url) ?? [])].filter(Boolean);
   const comodidades = imovel.comodidades_condominio
     ? imovel.comodidades_condominio.split(",").map(s => s.trim()).filter(Boolean)
     : [];
+
+  const telWhatsApp = "5591999999999";
+  const msgWhatsApp = encodeURIComponent(`Olá! Vi o imóvel "${imovel.titulo}" no site da Nexus Habitar e gostaria de mais informações.`);
+  const hrefWhatsApp = `https://wa.me/${telWhatsApp}?text=${msgWhatsApp}`;
 
   return (
     <div className="min-h-screen bg-white text-slate-800">
@@ -183,7 +178,7 @@ export default function DetalheImovelPage() {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <Link href="/" className="flex-shrink-0">
-            <img src="/logo_nome.png" alt="Nexus Habitar" className="h-8 w-auto object-contain opacity-90" />
+            <Image src="/logo_nome.png" alt="Nexus Habitar" width={160} height={50} className="h-8 w-auto object-contain opacity-90" />
           </Link>
           <button onClick={() => router.back()} className="flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs font-semibold transition-colors">
             <IconArrowLeft /> Voltar
@@ -192,7 +187,7 @@ export default function DetalheImovelPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
           {/* ── COLUNA PRINCIPAL ──────────────────────────────────────────── */}
           <div className="lg:col-span-2 space-y-6">
@@ -205,11 +200,32 @@ export default function DetalheImovelPage() {
                     src={todasFotos[fotoIdx]}
                     alt={imovel.titulo}
                     decoding="async"
-                    className="w-full h-full object-cover"
+                    priority="true"
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={() => setLightboxAberto(true)}
                   />
-                  <span className="absolute bottom-3 right-3 bg-[#0B1120]/80 backdrop-blur text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                  <span className="absolute bottom-3 right-3 bg-[#0B1120]/80 backdrop-blur text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-full pointer-events-none">
                     {fotoIdx + 1} / {todasFotos.length}
                   </span>
+
+                  {/* Seta anterior */}
+                  {todasFotos.length > 1 && fotoIdx > 0 && (
+                    <button
+                      onClick={() => setFotoIdx(i => i - 1)}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-black/80 transition-all"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                  )}
+                  {/* Seta próxima */}
+                  {todasFotos.length > 1 && fotoIdx < todasFotos.length - 1 && (
+                    <button
+                      onClick={() => setFotoIdx(i => i + 1)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full bg-black/60 backdrop-blur border border-white/20 flex items-center justify-center text-white hover:bg-black/80 transition-all"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                  )}
                 </div>
                 {todasFotos.length > 1 && (
                   <div className="flex gap-2 overflow-x-auto pb-1">
@@ -217,7 +233,7 @@ export default function DetalheImovelPage() {
                       <button
                         key={i}
                         onClick={() => setFotoIdx(i)}
-                        className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                        className={`relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
                           i === fotoIdx ? "border-blue-500 scale-105" : "border-slate-800 hover:border-slate-600"
                         }`}
                       >
@@ -263,7 +279,7 @@ export default function DetalheImovelPage() {
                 { icon: <IconBedDouble />, label: "Suítes",    valor: imovel.suites     },
                 { icon: <IconBath />,      label: "Banheiros", valor: imovel.banheiros  },
                 { icon: <IconCar />,       label: "Vagas",     valor: imovel.vagas      },
-                { icon: <IconArea />, label: "Área",      valor: imovel.area_util ? `${imovel.area_util} m²` : "—" },
+                { icon: <IconArea />, label: "Área", valor: imovel.area_util ? `${imovel.area_util} m²` : "—" },
               ].filter(d => d.valor != null && d.valor !== 0 && d.valor !== "0").map(({ icon, label, valor }) => (
                 <div key={label} className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center gap-2">
                   <span className="text-blue-600">{icon}</span>
@@ -300,10 +316,10 @@ export default function DetalheImovelPage() {
           </div>
 
           {/* ── SIDEBAR DIREITA ───────────────────────────────────────────── */}
-          <div className="space-y-4">
+          <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
 
-            {/* Preço */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 sticky top-20 shadow-sm">
+            {/* Preço + botões */}
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
               <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Valor</p>
               <p className="text-3xl font-black text-blue-600 mb-1">{formatarPreco(imovel.preco)}</p>
               {imovel.valor_condominio > 0 && (
@@ -313,7 +329,7 @@ export default function DetalheImovelPage() {
                 <p className="text-slate-500 text-xs">IPTU: {formatarPreco(imovel.iptu)}/ano</p>
               )}
 
-              <div className="border-t border-slate-200 mt-4 pt-4">
+              <div className="border-t border-slate-200 mt-4 pt-4 flex flex-col gap-3">
                 {leadOk ? (
                   <div className="flex flex-col items-center gap-3 py-4 text-center">
                     <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
@@ -322,7 +338,7 @@ export default function DetalheImovelPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-white font-bold text-sm">Visita agendada!</p>
+                      <p className="text-slate-800 font-bold text-sm">Visita agendada!</p>
                       <p className="text-slate-400 text-xs mt-0.5">Entraremos em contato para confirmar.</p>
                     </div>
                     <button onClick={() => setLeadOk(false)} className="text-blue-400 hover:text-blue-300 text-xs underline">
@@ -332,19 +348,91 @@ export default function DetalheImovelPage() {
                 ) : (
                   <button
                     onClick={() => setModalAberto(true)}
-                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[.98]
-                               text-white font-bold text-sm flex items-center justify-center gap-2
-                               shadow-lg shadow-blue-900/40 transition-all"
+                    className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[.98] text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-900/40 transition-all"
                   >
                     <IconCalendar />
                     Agende sua visita
                   </button>
                 )}
+
+                {/* WhatsApp */}
+                <a
+                  href={hrefWhatsApp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[.98]"
+                  style={{ backgroundColor: '#25D366', boxShadow: '0 0 20px rgba(37,211,102,0.3)' }}
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                  </svg>
+                  Entrar em contato
+                </a>
               </div>
+            </div>
+
+            {/* Card do corretor */}
+            <div className="bg-[#0e1829] border border-white/8 rounded-2xl p-4">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Corretor responsável</p>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-blue-900/50 border border-blue-700/40 flex items-center justify-center text-sm font-bold text-blue-300 flex-shrink-0">
+                  NH
+                </div>
+                <div>
+                  <p className="text-slate-200 font-semibold text-sm">Nexus Habitar</p>
+                  <p className="text-slate-500 text-xs mt-0.5">
+                    CRECI: {imovel.publicado_por_creci || imovel.corretor_creci || "12345-PA"}
+                  </p>
+                </div>
+              </div>
+              <Link
+                href={`/corretor/${imovel.publicado_por_id || imovel.corretor_id || "1"}`}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 text-slate-400 hover:text-white hover:border-blue-500/40 text-xs font-medium transition-all"
+              >
+                Ver imóveis desse corretor
+              </Link>
             </div>
           </div>
         </div>
       </main>
+
+      {/* ─── LIGHTBOX ────────────────────────────────────────────────────────── */}
+      {lightboxAberto && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center"
+          onClick={() => setLightboxAberto(false)}
+        >
+          <button
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all z-10"
+            onClick={() => setLightboxAberto(false)}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+          {todasFotos.length > 1 && fotoIdx > 0 && (
+            <button onClick={e => { e.stopPropagation(); setFotoIdx(i => i - 1); }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all z-10">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+          )}
+          {todasFotos.length > 1 && fotoIdx < todasFotos.length - 1 && (
+            <button onClick={e => { e.stopPropagation(); setFotoIdx(i => i + 1); }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all z-10">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+            </button>
+          )}
+          <div onClick={e => e.stopPropagation()} className="relative max-w-5xl max-h-[85vh] w-full mx-4">
+            <img
+              src={todasFotos[fotoIdx]}
+              alt={imovel?.titulo}
+              className="w-full h-full object-contain rounded-xl"
+              style={{ maxHeight: "85vh" }}
+            />
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+              {fotoIdx + 1} / {todasFotos.length}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ─── MODAL — AGENDAR VISITA ──────────────────────────────────────────── */}
       {modalAberto && (
@@ -353,13 +441,13 @@ export default function DetalheImovelPage() {
           onClick={e => { if (e.target === e.currentTarget) fecharModal(); }}
         >
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-          <div className="relative w-full max-w-md bg-[#0F172A] border border-slate-700/60 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden max-h-[90vh] overflow-y-auto">
+          <div className="relative w-full max-w-md bg-[#0F172A] border border-slate-700/60 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden">
 
             {/* Cabeçalho */}
-            <div className="flex items-start justify-between p-6 border-b border-slate-800">
+            <div className="flex items-start justify-between p-5 border-b border-slate-800">
               <div>
-                <h2 className="text-blue-400 font-extrabold text-lg leading-tight">Agende sua visita</h2>
-                <p className="text-slate-400 text-xs mt-1">{imovel?.titulo}</p>
+                <h2 className="text-blue-400 font-extrabold text-base leading-tight">Gostou do imóvel? Agende já sua visita com a nossa equipe</h2>
+                <p className="text-slate-400 text-xs mt-1">Imóvel de interesse: <span className="text-slate-300">{imovel?.titulo}</span></p>
               </div>
               <button onClick={fecharModal} className="text-slate-500 hover:text-white transition-colors ml-4 mt-0.5 shrink-0">
                 <IconClose />
@@ -383,7 +471,7 @@ export default function DetalheImovelPage() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleLead} className="p-6 flex flex-col gap-4">
+              <form onSubmit={handleLead} className="p-5 flex flex-col gap-3">
 
                 <div>
                   <label className={labelClass}>Nome *</label>
@@ -403,22 +491,45 @@ export default function DetalheImovelPage() {
                     value={lead.email} onChange={e => setLead(p => ({ ...p, email: e.target.value }))} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={labelClass}>Data da visita</label>
-                    <input type="date" min={hoje} className={inputClass + " [color-scheme:dark]"}
-                      value={lead.data_visita} onChange={e => setLead(p => ({ ...p, data_visita: e.target.value }))} />
+                {/* Data da visita — botões de dia */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Data preferida</label>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {Array.from({ length: 8 }, (_, i) => {
+                      const d = new Date();
+                      d.setDate(d.getDate() + i + 1);
+                      const iso = d.toISOString().split("T")[0];
+                      const label = i === 0 ? "Amanhã" : d.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric" });
+                      const ativo = lead.data_visita === iso;
+                      return (
+                        <button key={iso} type="button" onClick={() => setLead(p => ({ ...p, data_visita: iso }))}
+                          className={`py-2 px-1 rounded-lg border text-center transition-all ${ativo ? "bg-blue-600/20 border-blue-500/40 text-blue-300 font-medium text-[10px]" : "bg-white/4 border-white/8 text-slate-500 hover:text-slate-300 text-[10px]"}`}>
+                          <div className="text-[9px] leading-tight">{label}</div>
+                        </button>
+                      );
+                    })}
                   </div>
-                  <div>
-                    <label className={labelClass}>Hora</label>
-                    <input type="time" className={inputClass + " [color-scheme:dark]"}
-                      value={lead.hora_visita} onChange={e => setLead(p => ({ ...p, hora_visita: e.target.value }))} />
+                </div>
+
+                {/* Horário */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Horário preferido</label>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {["09:00", "10:30", "14:00", "15:30", "16:00", "17:00", "18:00", "19:00"].map(h => {
+                      const ativo = lead.hora_visita === h;
+                      return (
+                        <button key={h} type="button" onClick={() => setLead(p => ({ ...p, hora_visita: h }))}
+                          className={`py-2 rounded-lg border text-[11px] transition-all ${ativo ? "bg-blue-600/20 border-blue-500/40 text-blue-300 font-medium" : "bg-white/4 border-white/8 text-slate-500 hover:text-slate-300"}`}>
+                          {h}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <div>
                   <label className={labelClass}>Mensagem <span className="text-slate-600 normal-case font-normal">(opcional)</span></label>
-                  <textarea rows={3} className={inputClass + " resize-none"} placeholder="Alguma observação para a visita..."
+                  <textarea rows={2} className={inputClass + " resize-none"} placeholder="Alguma observação para a visita..."
                     value={lead.mensagem} onChange={e => setLead(p => ({ ...p, mensagem: e.target.value }))} />
                 </div>
 
@@ -454,7 +565,7 @@ export default function DetalheImovelPage() {
       {/* ─── FOOTER ─────────────────────────────────────────────────────────── */}
       <footer className="border-t border-slate-200 bg-slate-50 mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <img src="/logo_nome.png" alt="Nexus Habitar" className="h-6 object-contain opacity-50" />
+          <Image src="/logo_nome.png" alt="Nexus Habitar" width={160} height={50} className="h-6 w-auto object-contain opacity-50" />
           <p className="text-slate-400 text-xs">© {new Date().getFullYear()} Nexus Habitar</p>
         </div>
       </footer>
