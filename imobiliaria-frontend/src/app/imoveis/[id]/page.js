@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
+import { APIProvider, Map, AdvancedMarker, Pin } from "@vis.gl/react-google-maps";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const MAPS_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+const MAPS_MAP_ID = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID;
 
 /* ─── Ícones ────────────────────────────────────────────────────────────── */
 const IconArrowLeft = () => (
@@ -369,6 +372,45 @@ export default function DetalheImovelPage() {
                   Entrar em contato
                 </a>
               </div>
+            </div>
+
+            {/* Card do mapa */}
+            <div className="bg-[#0e1829] border border-white/8 rounded-2xl overflow-hidden">
+              <div className="px-4 pt-4 pb-2">
+                <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-0.5">Localização</h3>
+                <p className="text-slate-500 text-xs">{[imovel.bairro, imovel.cidade, "PA"].filter(Boolean).join(", ")}</p>
+              </div>
+              <div className="h-44 w-full">
+                {imovel.latitude && imovel.longitude ? (
+                  <APIProvider apiKey={MAPS_KEY ?? ""}>
+                    <Map
+                      mapId={MAPS_MAP_ID}
+                      defaultCenter={{ lat: parseFloat(imovel.latitude), lng: parseFloat(imovel.longitude) }}
+                      defaultZoom={15}
+                      disableDefaultUI={true}
+                      gestureHandling="none"
+                      style={{ width: "100%", height: "100%" }}
+                    >
+                      <AdvancedMarker position={{ lat: parseFloat(imovel.latitude), lng: parseFloat(imovel.longitude) }} title={imovel.titulo}>
+                        <Pin background="#185FA5" borderColor="#0C447C" glyphColor="#ffffff" scale={1.2} />
+                      </AdvancedMarker>
+                    </Map>
+                  </APIProvider>
+                ) : (
+                  <div className="h-full w-full bg-[#0a1628] flex flex-col items-center justify-center gap-2">
+                    <svg className="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.4}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/>
+                    </svg>
+                    <p className="text-slate-600 text-xs">Localização não disponível</p>
+                  </div>
+                )}
+              </div>
+              {[imovel.endereco, imovel.numero].filter(Boolean).length > 0 && (
+                <div className="px-4 py-3 border-t border-white/8">
+                  <p className="text-slate-400 text-xs">{[imovel.endereco, imovel.numero, imovel.complemento].filter(Boolean).join(", ")}</p>
+                </div>
+              )}
             </div>
 
             {/* Card do corretor */}

@@ -111,6 +111,7 @@ class ImovelListaView(APIView):
                 "vagas": im.vagas,
                 "latitude": im.latitude,
                 "longitude": im.longitude,
+                "comodidades_condominio": im.comodidades_condominio or "",
                 "capa": capa_url(im),
                 "ativo": im.ativo,
             }

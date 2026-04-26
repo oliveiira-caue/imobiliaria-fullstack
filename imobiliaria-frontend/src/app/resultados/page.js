@@ -71,15 +71,18 @@ function matchMinimo(valorParam, campoImovel) {
 
 /* ─── Card de imóvel ────────────────────────────────────────────────────── */
 function CardImovel({ imovel, destacado, onClick }) {
+  const isAluguel = imovel.finalidade === "Aluguel";
+  const corPreco  = isAluguel ? "text-emerald-400" : "text-blue-400";
+
   return (
     <article
       onClick={onClick}
-      className={`group cursor-pointer bg-white border rounded-xl overflow-hidden
-        hover:border-blue-400 hover:shadow-xl hover:shadow-blue-100
+      className={`group cursor-pointer bg-[#0e1829] border rounded-xl overflow-hidden
+        hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-900/20
         transition-all duration-300
-        ${destacado ? "border-blue-500 shadow-lg shadow-blue-100" : "border-slate-200"}`}
+        ${destacado ? "border-blue-500/60 shadow-lg shadow-blue-900/30" : "border-white/8"}`}
     >
-      <div className="relative h-36 bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
+      <div className="relative h-40 bg-[#0a1628] overflow-hidden">
         {imovel.capa ? (
           <img
             src={imovel.capa}
@@ -89,14 +92,20 @@ function CardImovel({ imovel, destacado, onClick }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <>
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-100/60 to-transparent" />
-            <IconHome className="absolute inset-0 m-auto w-10 h-10 text-slate-300" />
-          </>
+          <div className="w-full h-full flex items-center justify-center">
+            <IconHome className="w-10 h-10 text-slate-700" />
+          </div>
         )}
-        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-sm border border-slate-200 text-slate-700 text-[9px] font-semibold">
-          {imovel.tipo_imovel || "Imóvel"}
-        </span>
+        <div className="absolute top-2 left-2 flex gap-1.5">
+          <span className="px-2 py-0.5 rounded-full bg-black/60 text-white text-[9px] font-bold uppercase">
+            {imovel.tipo_imovel || "Imóvel"}
+          </span>
+          {imovel.finalidade && (
+            <span className={`px-2 py-0.5 rounded-full text-white text-[9px] font-bold uppercase ${isAluguel ? "bg-emerald-600/80" : "bg-blue-600/80"}`}>
+              {imovel.finalidade}
+            </span>
+          )}
+        </div>
         {imovel.latitude && imovel.longitude && (
           <span className="absolute bottom-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-blue-600/80 text-white text-[8px] font-bold">
             <IconMapPin className="w-2 h-2" /> GPS
@@ -104,13 +113,13 @@ function CardImovel({ imovel, destacado, onClick }) {
         )}
       </div>
       <div className="p-3">
-        <h3 className="text-slate-800 font-bold text-xs mb-0.5 group-hover:text-blue-600 transition-colors line-clamp-1">
+        <p className={`${corPreco} font-extrabold text-base mb-1`}>{formatarPreco(imovel.preco)}</p>
+        <h3 className="text-slate-200 font-bold text-xs mb-1.5 group-hover:text-blue-400 transition-colors line-clamp-1">
           {imovel.titulo}
         </h3>
-        <p className="text-slate-500 text-[9px] flex items-center gap-1 mb-1.5">
-          <IconMapPin className="w-2.5 h-2.5 text-slate-500" />{imovel.bairro || "—"}
+        <p className="text-slate-500 text-[10px] flex items-center gap-1">
+          <IconMapPin className="w-2.5 h-2.5" />{imovel.bairro || "—"}, {imovel.cidade || "Belém"}, PA
         </p>
-        <p className="text-blue-600 font-extrabold text-sm">{formatarPreco(imovel.preco)}</p>
       </div>
     </article>
   );
@@ -138,7 +147,7 @@ function MapaGoogle({ imoveis }) {
     : BELEM;
 
   return (
-    <div className="w-full h-[480px] rounded-2xl overflow-hidden border border-slate-200 shadow-2xl shadow-black/10 relative">
+    <div className="w-full h-[480px] rounded-2xl overflow-hidden border border-white/8 shadow-2xl shadow-black/30 relative">
       <Map
         mapId={MAPS_MAP_ID}
         defaultCenter={centro}
@@ -198,7 +207,7 @@ function MapaGoogle({ imoveis }) {
 /* ─── Loading ───────────────────────────────────────────────────────────── */
 function LoadingScreen() {
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="min-h-screen bg-[#070d1a] flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <svg className="w-8 h-8 text-blue-500 animate-spin" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
@@ -326,10 +335,10 @@ function ResultadosConteudo() {
 
   return (
     <APIProvider apiKey={MAPS_KEY ?? ""}>
-      <div className="min-h-screen bg-white text-slate-800">
+      <div className="min-h-screen bg-[#070d1a] text-white">
 
         {/* ─── HEADER ─────────────────────────────────────────────────── */}
-        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-slate-200">
+        <header className="sticky top-0 z-40 bg-[#070d1a]/95 backdrop-blur-xl border-b border-white/8">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
             <Link href="/" className="flex-shrink-0">
               <img src="/logo_nome.png" alt="Nexus Habitar" className="h-8 w-auto object-contain opacity-90" />
@@ -337,7 +346,7 @@ function ResultadosConteudo() {
             <button
               type="button"
               onClick={() => router.push("/")}
-              className="flex items-center gap-2 text-slate-500 hover:text-slate-800 text-xs font-semibold transition-colors"
+              className="flex items-center gap-2 text-slate-400 hover:text-white text-xs font-semibold transition-colors"
             >
               <IconArrowLeft className="w-3.5 h-3.5" />
               Nova busca
@@ -358,7 +367,7 @@ function ResultadosConteudo() {
                   {modoFiltrado ? "Resultados Filtrados" : "Resultado da Busca com IA"}
                 </p>
               </div>
-              <h1 className="text-2xl font-extrabold text-slate-800">
+              <h1 className="text-2xl font-extrabold text-white">
                 {imoveis.length > 0
                   ? `${imoveis.length} ${imoveis.length === 1 ? "imóvel encontrado" : "imóveis encontrados"}`
                   : "Nenhum imóvel encontrado"}
@@ -371,12 +380,12 @@ function ResultadosConteudo() {
             </div>
 
             {/* Toggle Lista / Mapa */}
-            <div className="flex items-center bg-slate-100 border border-slate-200 rounded-xl p-0.5 gap-0.5 self-start sm:self-auto">
+            <div className="flex items-center bg-[#0b1525] border border-white/8 rounded-xl p-0.5 gap-0.5 self-start sm:self-auto">
               <button
                 type="button"
                 onClick={() => setViewMode("lista")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
-                  ${viewMode === "lista" ? "bg-blue-600 text-white shadow-md shadow-blue-600/20" : "text-slate-500 hover:text-slate-700"}`}
+                  ${viewMode === "lista" ? "bg-blue-600 text-white shadow-md shadow-blue-900/40" : "text-slate-400 hover:text-slate-200"}`}
               >
                 <IconList className="w-3.5 h-3.5" /> Lista
               </button>
@@ -384,7 +393,7 @@ function ResultadosConteudo() {
                 type="button"
                 onClick={() => { setViewMode("mapa"); setMapaCarregado(true); }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200
-                  ${viewMode === "mapa" ? "bg-blue-600 text-white shadow-md shadow-blue-600/20" : "text-slate-500 hover:text-slate-700"}`}
+                  ${viewMode === "mapa" ? "bg-blue-600 text-white shadow-md shadow-blue-900/40" : "text-slate-400 hover:text-slate-200"}`}
               >
                 <IconMapPin className="w-3.5 h-3.5" /> Mapa
               </button>
@@ -394,7 +403,7 @@ function ResultadosConteudo() {
           {/* ─── ETIQUETAS DE FILTROS ─────────────────────────────────── */}
           {modoFiltrado && etiquetasAtivas.length > 0 && (
             <div className="mb-6 flex flex-wrap gap-2 items-center">
-              <span className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">Filtros:</span>
+              <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Filtros:</span>
               {etiquetasAtivas.map(([chave, valor]) => (
                 <span key={chave}
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-300 text-[10px] font-semibold">
@@ -406,7 +415,7 @@ function ResultadosConteudo() {
 
           {!modoFiltrado && filtrosAtivos.length > 0 && (
             <div className="mb-6 flex flex-wrap gap-2 items-center">
-              <span className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">IA entendeu:</span>
+              <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">IA entendeu:</span>
               {filtrosAtivos.map(([chave, valor]) => (
                 <span key={chave}
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-300 text-[10px] font-semibold">
@@ -422,11 +431,11 @@ function ResultadosConteudo() {
           {/* ─── CONTEÚDO ─────────────────────────────────────────────── */}
           {imoveis.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 gap-5 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center">
-                <IconHome className="w-8 h-8 text-slate-400" />
+              <div className="w-16 h-16 rounded-2xl bg-[#0e1829] border border-white/8 flex items-center justify-center">
+                <IconHome className="w-8 h-8 text-slate-600" />
               </div>
               <div>
-                <h2 className="text-slate-800 font-bold text-lg mb-1">Nenhum imóvel encontrado</h2>
+                <h2 className="text-white font-bold text-lg mb-1">Nenhum imóvel encontrado</h2>
                 <p className="text-slate-500 text-sm max-w-sm">
                   Nenhum imóvel corresponde a esses critérios. Tente ajustar os filtros.
                 </p>
@@ -461,7 +470,7 @@ function ResultadosConteudo() {
                       <MapaGoogle imoveis={imoveis} />
                       {imoveis.filter(im => im.latitude && im.longitude).length > 0 && (
                         <div className="mt-2 flex items-center gap-2 px-1">
-                          <div className="w-3 h-3 rounded-full bg-blue-600 border border-blue-300" />
+                          <div className="w-3 h-3 rounded-full bg-blue-600 border border-blue-400/40" />
                           <span className="text-slate-500 text-[10px]">
                             {(() => {
                               const n = imoveis.filter(im => im.latitude && im.longitude).length;
@@ -492,10 +501,10 @@ function ResultadosConteudo() {
         </main>
 
         {/* ─── FOOTER ───────────────────────────────────────────────── */}
-        <footer className="border-t border-slate-200 bg-slate-50 mt-16">
+        <footer className="border-t border-white/8 bg-[#070d1a] mt-16">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <img src="/logo_nome.png" alt="Nexus Habitar" className="h-6 object-contain opacity-50" />
-            <p className="text-slate-400 text-xs">© {new Date().getFullYear()} Nexus Habitar</p>
+            <p className="text-slate-500 text-xs">© {new Date().getFullYear()} Nexus Habitar</p>
           </div>
         </footer>
       </div>

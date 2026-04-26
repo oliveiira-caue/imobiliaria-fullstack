@@ -41,23 +41,22 @@ export default function Dashboard() {
 
   if (carregando) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-600"></div>
+      <div className="flex h-screen items-center justify-center bg-[#070d1a]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div data-tema="claro" className="flex h-screen overflow-hidden bg-slate-100 text-slate-700 flex-col md:flex-row font-sans antialiased">
+    <div data-tema="escuro" className="flex h-screen overflow-hidden bg-[#070d1a] text-slate-200 flex-col md:flex-row font-sans antialiased">
 
-      {/* MOBILE TOPBAR */}
-      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-slate-200 shrink-0 z-30">
-        <h2 className="text-sm font-bold text-blue-500 tracking-[0.2em] uppercase">
-          Nexus<span className="text-slate-800"> Admin</span>
+      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0b1525] border-b border-white/8 shrink-0 z-30">
+        <h2 className="text-sm font-bold text-blue-400 tracking-[0.2em] uppercase">
+          Nexus<span className="text-white"> Admin</span>
         </h2>
         <button
           onClick={() => setMenuAberto(m => !m)}
-          className="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 active:bg-slate-100 transition-colors"
+          className="w-9 h-9 flex items-center justify-center rounded-xl border border-white/10 bg-[#0e1829] text-slate-400 active:bg-white/5 transition-colors"
         >
           {menuAberto ? (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -67,7 +66,6 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* BACKDROP MOBILE */}
       {menuAberto && (
         <div
           className="md:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
@@ -75,7 +73,6 @@ export default function Dashboard() {
         />
       )}
 
-      {/* TOAST */}
       {toast && (
         <div
           style={{ animation: toast.saindo ? "toast-out 0.5s ease-in forwards" : "toast-in 0.4s ease-out forwards" }}
@@ -100,10 +97,9 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* SIDEBAR */}
-      <aside className={`${menuAberto ? "flex" : "hidden"} md:flex fixed md:relative inset-y-0 left-0 z-50 md:z-auto w-72 md:w-52 bg-white md:bg-slate-50 border-r border-slate-200/60 p-5 flex-col shrink-0 shadow-2xl md:shadow-none`}>
-        <h2 className="text-sm font-bold text-blue-500 mb-8 tracking-[0.3em] text-center uppercase">
-          Nexus<span className="text-slate-800"> Admin</span>
+      <aside className={`${menuAberto ? "flex" : "hidden"} md:flex fixed md:relative inset-y-0 left-0 z-50 md:z-auto w-72 md:w-52 bg-[#0b1525] border-r border-white/8 p-5 flex-col shrink-0 shadow-2xl md:shadow-none`}>
+        <h2 className="text-sm font-bold text-blue-400 mb-8 tracking-[0.3em] text-center uppercase">
+          Nexus<span className="text-white"> Admin</span>
         </h2>
 
         <nav className="flex-1 space-y-1">
@@ -127,7 +123,7 @@ export default function Dashboard() {
                   setAbaAtiva(key);
                   setMenuAberto(false);
                 }}
-                className={`w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all ${isActive ? "bg-blue-600/15 text-blue-600 border border-blue-500/20" : "hover:bg-slate-100 text-slate-500 hover:text-slate-700 border border-transparent"}`}
+                className={`w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all ${isActive ? "bg-blue-600/20 text-blue-400 border border-blue-500/30" : "hover:bg-white/5 text-slate-400 hover:text-slate-200 border border-transparent"}`}
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">{icon}</svg>
                 {label}
@@ -136,25 +132,23 @@ export default function Dashboard() {
           })}
         </nav>
 
-        <div className="mt-auto pt-5 border-t border-slate-200/60">
-          <button onClick={fazerLogout} className="text-slate-600 hover:text-red-600 text-xs font-semibold transition-colors flex items-center gap-2 px-1">
+        <div className="mt-auto pt-5 border-t border-white/8">
+          <button onClick={fazerLogout} className="text-slate-400 hover:text-red-400 text-xs font-semibold transition-colors flex items-center gap-2 px-1">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
             Sair do sistema
           </button>
         </div>
       </aside>
 
-      {/* MAIN */}
-      <main className="flex-1 p-4 md:p-6 overflow-y-auto bg-slate-100">
+      <main className="flex-1 p-4 md:p-6 overflow-y-auto bg-[#070d1a]">
         <div className="max-w-6xl mx-auto">
           {abaAtiva === "inicio" && <PainelInicio irPara={setAbaAtiva} />}
-          {/* Formulário sempre montado — exibido/escondido via CSS para preservar o estado ao trocar de aba */}
           <div className={abaAtiva === "cadastrar" ? "" : "hidden"}>
             {imovelEditando && (
               <div className="flex items-center gap-2 mb-4">
                 <button
                   onClick={() => { setImovelEditando(null); setAbaAtiva("meus_imoveis"); }}
-                  className="flex items-center gap-1.5 text-slate-500 hover:text-slate-700 text-xs font-semibold transition-colors"
+                  className="flex items-center gap-1.5 text-slate-400 hover:text-slate-200 text-xs font-semibold transition-colors"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
@@ -164,7 +158,7 @@ export default function Dashboard() {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-600">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
-                <span className="text-xs font-semibold text-blue-600">Edição</span>
+                <span className="text-xs font-semibold text-blue-400">Edição</span>
               </div>
             )}
             <FormularioNovoImovel
@@ -184,7 +178,6 @@ export default function Dashboard() {
   );
 }
 
-// ─── Ícones dos campos de detalhes ─────────────────────────────────────────
 const ICONES_CAMPOS = {
   area_util: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -232,7 +225,6 @@ const LABELS_CAMPOS = {
   vagas: "Vagas",
 };
 
-// ─── Formulário ────────────────────────────────────────────────────────────
 function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
   const [salvando, setSalvando] = useState(false);
   const [carregandoDados, setCarregandoDados] = useState(!!imovelId);
@@ -241,9 +233,7 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
 
   const [fotoCapa, setFotoCapa] = useState(null);
   const [previaCapa, setPreviaCapa] = useState(null);
-  // fotos já salvas no servidor (edit mode) — guardam URL e id
   const [fotosExistentesGaleria, setFotosExistentesGaleria] = useState([]);
-  // novos arquivos que o usuário selecionou nesta sessão
   const [arquivosGaleria, setArquivosGaleria] = useState([]);
   const [previasGaleria, setPreviasGaleria] = useState([]);
   const ultimoCepBuscado = useRef("");
@@ -302,22 +292,18 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
             if (dados.comodidades_condominio) {
               setComodidadesSelecionadas(dados.comodidades_condominio.split(","));
             }
-            // ── Carrega fotos existentes ──────────────────────────────
             if (dados.capa) setPreviaCapa(dados.capa);
             if (dados.fotos_galeria && dados.fotos_galeria.length > 0) {
-              setFotosExistentesGaleria(dados.fotos_galeria); // [{id, url}]
+              setFotosExistentesGaleria(dados.fotos_galeria);
               setPreviasGaleria(dados.fotos_galeria.map(f => f.url));
             }
-            // ── Preenche campos de texto ───────────────────────────────
             setTimeout(() => {
               if (formRef.current) {
                 const campos = ["titulo", "descricao", "tipo_imovel", "tipo_finalidade", "finalidade", "area_util", "quartos", "suites", "banheiros", "vagas", "bairro", "endereco", "numero", "complemento", "cidade", "cep", "latitude", "longitude"];
                 campos.forEach(campo => {
                   const input = formRef.current.querySelector(`[name="${campo}"]`);
-                  // usa != null para cobrir tanto null quanto undefined
                   if (input && dados[campo] != null) input.value = dados[campo];
                 });
-                // registra o CEP carregado para evitar rebusca desnecessária
                 if (dados.cep) ultimoCepBuscado.current = dados.cep.replace(/\D/g, "");
               }
             }, 100);
@@ -390,7 +376,6 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
   const handleCepChange = async (e) => {
     let cepStr = e.target.value.replace(/\D/g, "");
     e.target.value = cepStr.replace(/^(\d{5})(\d)/, "$1-$2");
-    // só busca se tiver 8 dígitos E o CEP for diferente do último buscado
     if (cepStr.length === 8 && cepStr !== ultimoCepBuscado.current) {
       ultimoCepBuscado.current = cepStr;
       try {
@@ -408,7 +393,6 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
         }
       } catch (err) { console.error("Erro ao buscar CEP", err); }
     }
-    // limpa o cache quando o usuário apaga o CEP
     if (cepStr.length < 8) ultimoCepBuscado.current = "";
   };
 
@@ -443,11 +427,10 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
     const token = sessionStorage.getItem("tokenImobiliaria");
     const formData = new FormData();
 
-    // Campos gerais — exclui latitude/longitude para tratamento separado
     const CAMPOS_GEO = ["latitude", "longitude"];
     const inputs = formRef.current.querySelectorAll('input[name], select[name], textarea[name]');
     inputs.forEach(input => {
-      if (CAMPOS_GEO.includes(input.name)) return; // tratado abaixo
+      if (CAMPOS_GEO.includes(input.name)) return;
       let val = input.value;
       if (["preco", "valor_condominio", "iptu"].includes(input.name)) {
         val = val.replace(/\D/g, "") / 100;
@@ -455,7 +438,6 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
       formData.append(input.name, val);
     });
 
-    // Lat/Lng: envia string vazia se não preenchido (backend converte para NULL)
     const geoPayload = {};
     CAMPOS_GEO.forEach(campo => {
       const el = formRef.current.querySelector(`[name="${campo}"]`);
@@ -464,7 +446,6 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
       geoPayload[campo] = val || "(vazio)";
     });
 
-    // ── LOG DE DIAGNÓSTICO ─────────────────────────────────────────────────
     console.log("📡 Enviando FormData para API...");
     console.log("   Método:", imovelId ? "PUT" : "POST");
     console.log("   URL:", imovelId ? `${API}/api/imoveis/${imovelId}/` : `${API}/api/imoveis/`);
@@ -473,7 +454,6 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
     for (const [k, v] of formData.entries()) {
       if (k !== "galeria") console.log(`     ${k}: ${v}`);
     }
-    // ───────────────────────────────────────────────────────────────────────
 
     formData.append("comodidades_condominio", comodidadesSelecionadas.join(","));
     if (fotoCapa) formData.append("galeria", fotoCapa);
@@ -483,7 +463,6 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
     try {
       const resposta = await fetch(url, { method: metodo, headers: { "x-auth-token": token }, body: formData });
       if (resposta.ok) {
-        // Invalida o cache da busca IA para que o mapa reflita as novas coordenadas
         sessionStorage.removeItem("nexus_resultados_ia");
         console.log("✅ Salvo com sucesso! Cache sessionStorage invalidado.");
         onToast(imovelId ? "Imóvel atualizado com sucesso!" : "Imóvel publicado com sucesso!", "sucesso");
@@ -568,7 +547,7 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
   const voltarEtapa = () => setEtapaAtual(prev => Math.max(prev - 1, 1));
 
   const labelClass = "block text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1.5";
-  const inputClass = "w-full bg-white border border-slate-200 p-2.5 rounded-xl text-slate-800 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all font-medium placeholder:text-slate-400";
+  const inputClass = "w-full bg-[#0b1525] border border-white/10 p-2.5 rounded-xl text-slate-100 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all font-medium placeholder:text-slate-500";
   const erroClass = "text-red-600 text-[10px] font-semibold mt-1.5 flex items-center gap-1";
 
   if (carregandoDados) {
@@ -577,7 +556,6 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
 
   return (
     <div className="flex flex-col lg:flex-row gap-4 lg:gap-5 w-full mx-auto">
-      {/* SIDEBAR PROGRESSO */}
       <div className="w-full lg:w-52 shrink-0 flex flex-col gap-1 pt-1 lg:pt-2">
         <p className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.25em] px-3 mb-3">Progresso</p>
         {PASSOS.map((passo, idx) => {
@@ -587,7 +565,7 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
           return (
             <div
               key={num}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${ativo ? "bg-white border border-blue-200 shadow-sm" : "border border-transparent"} ${!ativo && !concluido ? "opacity-40" : ""}`}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${ativo ? "bg-[#0e1829] border border-blue-500/30 shadow-sm" : "border border-transparent"} ${!ativo && !concluido ? "opacity-40" : ""}`}
             >
               <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-[11px] font-bold transition-all duration-200 ${ativo ? "bg-blue-600 text-[#ffffff] shadow-md shadow-blue-600/40" : concluido ? "bg-emerald-600/20 text-emerald-600 border border-emerald-600/30" : "bg-slate-400 text-[#ffffff] border border-slate-300"}`}>
                 {concluido ? (
@@ -595,7 +573,7 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                 ) : num}
               </div>
               <div className="min-w-0">
-                <p className={`text-[13px] font-bold leading-tight truncate ${ativo ? "text-slate-800" : concluido ? "text-slate-500" : "text-slate-500"}`}>{passo.nome}</p>
+                <p className={`text-[13px] font-bold leading-tight truncate ${ativo ? "text-white" : concluido ? "text-slate-400" : "text-slate-500"}`}>{passo.nome}</p>
                 <p className={`text-[11px] leading-tight mt-0.5 ${ativo ? "text-blue-600" : "text-slate-500"}`}>{passo.desc}</p>
               </div>
             </div>
@@ -603,21 +581,18 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
         })}
       </div>
 
-      {/* ÁREA DO FORMULÁRIO */}
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200/80 shadow-xl shadow-slate-200 overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200/60 flex items-center justify-between bg-slate-50/60">
+      <div className="flex-1 bg-[#0e1829] rounded-2xl border border-white/8 shadow-xl shadow-black/20 overflow-hidden flex flex-col">
+        <div className="px-6 py-4 border-b border-white/8 flex items-center justify-between bg-[#0b1525]/60">
           <div>
-            <h2 className="text-sm font-bold text-slate-800">{imovelId ? "Editar Imóvel" : PASSOS[etapaAtual - 1].nome}</h2>
+            <h2 className="text-sm font-bold text-white">{imovelId ? "Editar Imóvel" : PASSOS[etapaAtual - 1].nome}</h2>
             <p className="text-[10px] text-slate-500 mt-0.5">{PASSOS[etapaAtual - 1].desc}</p>
           </div>
-          {imovelId && <span className="bg-amber-50 text-amber-700 py-1 px-3 rounded-full text-[10px] font-bold uppercase tracking-widest border border-amber-200">Modo Edição</span>}
+          {imovelId && <span className="bg-amber-500/10 text-amber-400 py-1 px-3 rounded-full text-[10px] font-bold uppercase tracking-widest border border-amber-500/20">Modo Edição</span>}
         </div>
 
         <form ref={formRef} onSubmit={(e) => e.preventDefault()} className="flex-1 overflow-y-auto">
           <div className="p-5 md:p-6 space-y-5">
 
-            {/* ── ETAPA 1: DADOS BÁSICOS ─────────────────────────────── */}
             <div className={etapaAtual === 1 ? "step-animate space-y-5" : "hidden"}>
               <div>
                 <label className={`${labelClass} ${erros.titulo ? "text-red-600" : ""}`}>Título do Anúncio</label>
@@ -643,7 +618,7 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-200/60">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-[#0b1525]/50 p-4 rounded-xl border border-white/8">
                 {[
                   { name: "preco", label: "Preço", err: erros.preco },
                   { name: "valor_condominio", label: "Condomínio", err: erros.valor_condominio },
@@ -658,18 +633,16 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
               </div>
             </div>
 
-            {/* ── ETAPA 2: FOTOS ─────────────────────────────────────── */}
             <div className={etapaAtual === 2 ? "step-animate space-y-5" : "hidden"}>
-              {/* Foto de Capa */}
               <div>
                 <label className={`${labelClass} ${erros.capa ? "text-red-600" : ""}`}>Foto de Capa Principal</label>
                 {!previaCapa ? (
                   <div
                     onClick={() => capaInputRef.current.click()}
-                    className={`cursor-pointer border border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-all group ${erros.capa ? "border-red-500/60 bg-red-500/5" : "border-slate-200/60 bg-slate-50 hover:border-blue-500/60 hover:bg-blue-900/5"}`}
+                    className={`cursor-pointer border border-dashed rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-all group ${erros.capa ? "border-red-500/60 bg-red-500/5" : "border-white/10 bg-[#0b1525] hover:border-blue-500/60 hover:bg-blue-900/5"}`}
                   >
                     <input ref={capaInputRef} type="file" accept="image/*" onChange={(e) => { aoSelecionarCapa(e); setErros(prev => ({ ...prev, capa: null })); }} className="hidden" />
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${erros.capa ? "border-red-500/40 bg-red-50 text-red-600" : "border-slate-200 bg-slate-50 text-slate-400 group-hover:border-blue-400 group-hover:text-blue-500"}`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${erros.capa ? "border-red-500/40 bg-red-50 text-red-600" : "border-white/10 bg-white/5 text-slate-400 group-hover:border-blue-400 group-hover:text-blue-500"}`}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
                     </div>
                     <div className="text-center">
@@ -691,14 +664,13 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                 {erros.capa && <p className={erroClass}><span>⚠</span>{erros.capa}</p>}
               </div>
 
-              {/* Galeria */}
               <div className="border-t border-slate-200/60 pt-5">
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <label className={`${labelClass} ${erros.galeria ? "text-red-600" : ""}`}>Galeria do Imóvel</label>
                     <p className="text-[10px] text-slate-500">Mínimo de 1 foto · JPG, PNG · Máx. 20 fotos</p>
                   </div>
-                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${(arquivosGaleria.length + fotosExistentesGaleria.length) >= 1 ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-slate-100 text-slate-500 border border-slate-200"}`}>
+                  <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${(arquivosGaleria.length + fotosExistentesGaleria.length) >= 1 ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-white/5 text-slate-400 border border-white/10"}`}>
                     {arquivosGaleria.length + fotosExistentesGaleria.length}/20
                   </span>
                 </div>
@@ -706,10 +678,10 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                 {previasGaleria.length === 0 ? (
                   <div
                     onClick={() => galeriaInputRef.current.click()}
-                    className={`cursor-pointer border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center gap-4 transition-all group ${erros.galeria ? "border-red-500/50 bg-red-500/5" : "border-slate-200/50 bg-slate-50 hover:border-blue-500/50 hover:bg-blue-900/5"}`}
+                    className={`cursor-pointer border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center gap-4 transition-all group ${erros.galeria ? "border-red-500/50 bg-red-500/5" : "border-white/10 bg-[#0b1525] hover:border-blue-500/50 hover:bg-blue-900/5"}`}
                   >
                     <input ref={galeriaInputRef} type="file" accept="image/*" multiple onChange={aoSelecionarGaleria} className="hidden" />
-                    <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all ${erros.galeria ? "border-red-500/40 bg-red-50 text-red-600" : "border-slate-200 bg-slate-50 text-slate-400 group-hover:border-blue-400 group-hover:text-blue-500 group-hover:bg-blue-50"}`}>
+                    <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all ${erros.galeria ? "border-red-500/40 bg-red-50 text-red-600" : "border-white/10 bg-white/5 text-slate-400 group-hover:border-blue-400 group-hover:text-blue-500 group-hover:bg-blue-600/10"}`}>
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                         <polyline points="17 8 12 3 7 8" />
@@ -717,10 +689,10 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                       </svg>
                     </div>
                     <div className="text-center">
-                      <p className={`text-sm font-bold ${erros.galeria ? "text-red-600" : "text-slate-700"}`}>Arraste suas fotos aqui</p>
+                      <p className={`text-sm font-bold ${erros.galeria ? "text-red-600" : "text-slate-200"}`}>Arraste suas fotos aqui</p>
                       <p className={`text-xs mt-1 ${erros.galeria ? "text-red-600/70" : "text-slate-500"}`}>Ou clique para selecionar arquivos do seu computador</p>
                     </div>
-                    <button type="button" className={`px-5 py-2 rounded-full text-xs font-semibold border transition-all ${erros.galeria ? "border-red-500/40 text-red-600 hover:bg-red-50" : "border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-800"}`}>
+                    <button type="button" className={`px-5 py-2 rounded-full text-xs font-semibold border transition-all ${erros.galeria ? "border-red-500/40 text-red-600 hover:bg-red-50" : "border-white/15 text-slate-300 hover:bg-white/8 hover:text-white"}`}>
                       Selecionar Fotos
                     </button>
                     <p className="text-[10px] text-slate-600">Formatos aceitos: JPG, PNG. Máximo de 20 fotos.</p>
@@ -729,7 +701,7 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                   <div>
                     <div className="grid grid-cols-3 md:grid-cols-5 gap-2 mb-3">
                       {previasGaleria.map((src, idx) => (
-                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 group">
+                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-white/10 group">
                           <img src={src} className="w-full h-full object-cover" alt={`Foto ${idx + 1}`} />
                           <button
                             type="button"
@@ -741,7 +713,7 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                         </div>
                       ))}
                       {previasGaleria.length < 20 && (
-                        <div onClick={() => galeriaInputRef.current.click()} className="aspect-square rounded-lg border-2 border-dashed border-slate-200/60 bg-slate-50 hover:border-blue-500/50 hover:bg-blue-900/5 cursor-pointer flex flex-col items-center justify-center gap-1 transition-all group">
+                        <div onClick={() => galeriaInputRef.current.click()} className="aspect-square rounded-lg border-2 border-dashed border-white/10 bg-white/5 hover:border-blue-500/50 hover:bg-blue-900/5 cursor-pointer flex flex-col items-center justify-center gap-1 transition-all group">
                           <input ref={galeriaInputRef} type="file" accept="image/*" multiple onChange={aoSelecionarGaleria} className="hidden" />
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-500 group-hover:text-blue-600 transition-colors"><path d="M12 5v14M5 12h14" strokeLinecap="round" /></svg>
                           <span className="text-[9px] text-slate-500 group-hover:text-blue-600 font-bold uppercase tracking-wide transition-colors">Adicionar</span>
@@ -755,7 +727,6 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
               </div>
             </div>
 
-            {/* ── ETAPA 3: DETALHES ──────────────────────────────────── */}
             <div className={etapaAtual === 3 ? "step-animate space-y-5" : "hidden"}>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {["area_util", "quartos", "suites", "banheiros", "vagas"].map((campo) => (
@@ -778,7 +749,7 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                   </span>
                 </div>
                 {erros.comodidades && <p className={`${erroClass} mb-2`}><span>⚠</span>{erros.comodidades}</p>}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 bg-[#0b1525] p-4 rounded-xl border border-white/8">
                   {LISTA_COMODIDADES.map((item) => {
                     const sel = comodidadesSelecionadas.includes(item);
                     return (
@@ -786,9 +757,9 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                         key={item}
                         type="button"
                         onClick={() => { alternarComodidade(item); setErros(prev => ({ ...prev, comodidades: null })); }}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-semibold uppercase tracking-wide transition-all text-left border ${sel ? "bg-blue-600/10 border-blue-500/30 text-blue-600" : "bg-slate-50 border-slate-200 text-slate-500 hover:border-slate-400 hover:text-slate-700"}`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-semibold uppercase tracking-wide transition-all text-left border ${sel ? "bg-blue-600/10 border-blue-500/30 text-blue-600" : "bg-white/5 border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200"}`}
                       >
-                        <div className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 border transition-all ${sel ? "bg-blue-600 border-blue-600" : "border-slate-600"}`}>
+                        <div className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 border transition-all ${sel ? "bg-blue-600 border-blue-600" : "border-white/30"}`}>
                           {sel && <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4"><path d="M20 6L9 17L4 12" /></svg>}
                         </div>
                         {item}
@@ -799,7 +770,6 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
               </div>
             </div>
 
-            {/* ── ETAPA 4: LOCALIZAÇÃO ───────────────────────────────── */}
             <div className={etapaAtual === 4 ? "step-animate space-y-5" : "hidden"}>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
@@ -835,8 +805,7 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                 </div>
               </div>
 
-              {/* Coordenadas GPS — Google Maps */}
-              <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4">
+              <div className="bg-[#0b1525] border border-white/8 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600/70">
@@ -899,14 +868,12 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
               </div>
             </div>
 
-            {/* ── ETAPA 5: REVISÃO ───────────────────────────────────── */}
             <div className={etapaAtual === 5 ? "step-animate space-y-3" : "hidden"}>
               <div className="text-center pb-2">
-                <h3 className="text-base font-bold text-slate-800">Revise antes de publicar</h3>
+                <h3 className="text-base font-bold text-white">Revise antes de publicar</h3>
                 <p className="text-slate-400 text-xs mt-1">Confira se as informações estão corretas.</p>
               </div>
 
-              {/* Dados Básicos */}
               <ResumoCard titulo="Dados Básicos" onEdit={() => setEtapaAtual(1)}>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-3"><ResumoItem label="Título" valor={resumoDados.titulo} /></div>
@@ -919,20 +886,18 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                 </div>
               </ResumoCard>
 
-              {/* Fotos */}
               <ResumoCard titulo="Fotos" onEdit={() => setEtapaAtual(2)}>
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
                   </div>
                   <div>
-                    <p className="text-slate-700 text-sm font-semibold">1 foto de capa + {resumoDados.totalFotos || 0} fotos da galeria</p>
+                    <p className="text-slate-200 text-sm font-semibold">1 foto de capa + {resumoDados.totalFotos || 0} fotos da galeria</p>
                     <p className="text-slate-500 text-[10px] mt-0.5">Total: {(resumoDados.totalFotos || 0) + 1} imagem(ns)</p>
                   </div>
                 </div>
               </ResumoCard>
 
-              {/* Detalhes + Localização em grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <ResumoCard titulo="Detalhes do Imóvel" onEdit={() => setEtapaAtual(3)}>
                   <div className="grid grid-cols-2 gap-2">
@@ -943,21 +908,21 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                       { icon: ICONES_CAMPOS.banheiros, label: "Banheiros", valor: resumoDados.banheiros || "0" },
                       { icon: ICONES_CAMPOS.vagas, label: "Vagas", valor: resumoDados.vagas || "0" },
                     ].map(({ icon, label, valor }) => (
-                      <div key={label} className="bg-slate-50 rounded-lg p-2.5 flex items-center gap-2 border border-slate-200/60">
+                      <div key={label} className="bg-white/5 rounded-lg p-2.5 flex items-center gap-2 border border-white/8">
                         <span className="text-blue-600/60 shrink-0">{icon}</span>
                         <div>
                           <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wide">{label}</p>
-                          <p className="text-slate-700 font-bold text-xs">{valor}</p>
+                          <p className="text-slate-200 font-bold text-xs">{valor}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                   {resumoDados.comodidades?.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-slate-200/60">
+                    <div className="mt-3 pt-3 border-t border-white/8">
                       <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wide mb-2">Comodidades</p>
                       <div className="flex flex-wrap gap-1">
                         {resumoDados.comodidades.map(item => (
-                          <span key={item} className="bg-blue-50 text-blue-700 text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded border border-blue-200">{item}</span>
+                          <span key={item} className="bg-blue-600/10 text-blue-400 text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded border border-blue-500/20">{item}</span>
                         ))}
                       </div>
                     </div>
@@ -969,7 +934,7 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
                     <div className="flex items-start gap-2">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600/60 shrink-0 mt-0.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
                       <div>
-                        <p className="text-slate-700 text-xs font-bold">{resumoDados.endereco}, {resumoDados.numero} {resumoDados.complemento && `- ${resumoDados.complemento}`}</p>
+                        <p className="text-slate-200 text-xs font-bold">{resumoDados.endereco}, {resumoDados.numero} {resumoDados.complemento && `- ${resumoDados.complemento}`}</p>
                         <p className="text-slate-400 text-[10px] mt-0.5">{resumoDados.bairro} · {resumoDados.cidade}</p>
                         <p className="text-slate-500 text-[10px] mt-1 font-mono">CEP: {resumoDados.cep}</p>
                         {(resumoDados.latitude || resumoDados.longitude) && (
@@ -985,10 +950,9 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
             </div>
           </div>
 
-          {/* Botões de navegação */}
-          <div className="px-5 md:px-6 pb-5 pt-3 border-t border-slate-200/60 flex gap-3 bg-slate-50/40">
+          <div className="px-5 md:px-6 pb-5 pt-3 border-t border-white/8 flex gap-3 bg-[#0b1525]/40">
             {etapaAtual > 1 && (
-              <button type="button" onClick={voltarEtapa} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 font-bold py-3 rounded-xl text-xs uppercase tracking-wide transition-all border border-slate-200">
+              <button type="button" onClick={voltarEtapa} className="flex-1 bg-white/8 hover:bg-white/12 text-slate-300 hover:text-white font-bold py-3 rounded-xl text-xs uppercase tracking-wide transition-all border border-white/10">
                 ← Voltar
               </button>
             )}
@@ -1008,11 +972,10 @@ function FormularioNovoImovel({ imovelId, onToast, onSaved }) {
   );
 }
 
-// ─── Helpers de Resumo ─────────────────────────────────────────────────────
 function ResumoCard({ titulo, onEdit, children }) {
   return (
-    <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4">
-      <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-200/60">
+    <div className="bg-[#0b1525] border border-white/8 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/8">
         <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{titulo}</h4>
         <button type="button" onClick={onEdit} className="text-blue-600 hover:text-blue-700 text-[10px] font-semibold flex items-center gap-1.5 transition-colors">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
@@ -1028,12 +991,11 @@ function ResumoItem({ label, valor, destaque }) {
   return (
     <div>
       <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold mb-0.5">{label}</p>
-      <p className={`text-sm font-bold ${destaque ? "text-emerald-600" : "text-slate-700"}`}>{valor || "—"}</p>
+      <p className={`text-sm font-bold ${destaque ? "text-emerald-400" : "text-slate-200"}`}>{valor || "—"}</p>
     </div>
   );
 }
 
-// ─── Lista Imóveis ─────────────────────────────────────────────────────────
 function ListaImoveis({ aoEditar, onToast }) {
   const [imoveis, setImoveis] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -1067,15 +1029,15 @@ function ListaImoveis({ aoEditar, onToast }) {
   if (carregando) return <div className="text-center py-20 text-blue-500 animate-pulse font-bold tracking-widest">CARREGANDO...</div>;
 
   return (
-    <div className="bg-white p-5 md:p-8 rounded-2xl border border-slate-200/80 shadow-xl shadow-slate-200">
+    <div className="bg-[#0e1829] p-5 md:p-8 rounded-2xl border border-white/8 shadow-xl shadow-black/20">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-lg font-bold text-slate-800 tracking-tight">Meus Imóveis</h2>
-        <span className="bg-blue-50 text-blue-600 py-1 px-3 rounded-full text-xs font-bold border border-blue-200">{imoveis.length} anúncios</span>
+        <h2 className="text-lg font-bold text-white tracking-tight">Meus Imóveis</h2>
+        <span className="bg-blue-600/10 text-blue-400 py-1 px-3 rounded-full text-xs font-bold border border-blue-500/20">{imoveis.length} anúncios</span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {imoveis.map((imovel) => (
-          <div key={imovel.id} className={`bg-slate-50 border border-slate-200 rounded-xl overflow-hidden transition-all group ${imovel.ativo ? "hover:border-blue-500/40" : "opacity-60 grayscale hover:grayscale-0"}`}>
-            <div className="aspect-video bg-white relative overflow-hidden">
+          <div key={imovel.id} className={`bg-[#0b1525] border border-white/8 rounded-xl overflow-hidden transition-all group ${imovel.ativo ? "hover:border-blue-500/40" : "opacity-60 grayscale hover:grayscale-0"}`}>
+            <div className="aspect-video bg-[#0e1829] relative overflow-hidden">
               {imovel.capa ? (
                 <img src={imovel.capa} alt={imovel.titulo} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
               ) : (
@@ -1083,24 +1045,24 @@ function ListaImoveis({ aoEditar, onToast }) {
               )}
               <div className={`absolute top-2.5 left-2.5 text-[9px] px-2.5 py-1 rounded font-bold uppercase tracking-widest backdrop-blur-md ${imovel.finalidade === "Aluguel" ? "bg-emerald-500/90 text-white" : "bg-blue-600/90 text-white"}`}>{imovel.finalidade}</div>
               {!imovel.ativo && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+                <div className="absolute inset-0 flex items-center justify-center bg-[#070d1a]/80 backdrop-blur-sm">
                   <span className="bg-red-600 text-white font-bold px-4 py-2 rounded-lg text-xs uppercase tracking-widest shadow-2xl">Inativo</span>
                 </div>
               )}
             </div>
             <div className="p-4 space-y-3">
               <div>
-                <h3 className="text-slate-800 font-bold truncate text-sm">{imovel.titulo}</h3>
+                <h3 className="text-white font-bold truncate text-sm">{imovel.titulo}</h3>
                 <p className="text-slate-500 text-xs mt-0.5">{imovel.tipo_imovel} · {imovel.bairro}</p>
               </div>
               <div className={`font-bold text-base ${imovel.ativo ? "text-blue-600" : "text-slate-400"}`}>
                 R$ {Number(imovel.preco).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
               </div>
-              <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100">
-                <button onClick={() => aoEditar(imovel.id)} disabled={!imovel.ativo} className="bg-slate-100 hover:bg-blue-600 border border-slate-200 hover:border-blue-500 text-slate-700 hover:text-white py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wide disabled:opacity-30 disabled:cursor-not-allowed">
+              <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/8">
+                <button onClick={() => aoEditar(imovel.id)} disabled={!imovel.ativo} className="bg-white/5 hover:bg-blue-600 border border-white/10 hover:border-blue-500 text-slate-300 hover:text-white py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wide disabled:opacity-30 disabled:cursor-not-allowed">
                   Editar
                 </button>
-                <button onClick={() => alternarStatus(imovel.id)} className={`${imovel.ativo ? "bg-slate-100 hover:bg-red-600 border border-slate-200 hover:border-red-500 text-slate-700 hover:text-white" : "bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-200"} py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wide`}>
+                <button onClick={() => alternarStatus(imovel.id)} className={`${imovel.ativo ? "bg-white/5 hover:bg-red-600 border border-white/10 hover:border-red-500 text-slate-300 hover:text-white" : "bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/20"} py-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wide`}>
                   {imovel.ativo ? "Inativar" : "Reativar"}
                 </button>
               </div>
@@ -1109,7 +1071,7 @@ function ListaImoveis({ aoEditar, onToast }) {
         ))}
       </div>
       {imoveis.length === 0 && (
-        <div className="text-center py-20 text-slate-500 border border-dashed border-slate-200/50 rounded-xl">
+        <div className="text-center py-20 text-slate-400 border border-dashed border-white/10 rounded-xl">
           Nenhum imóvel cadastrado ainda.
         </div>
       )}
@@ -1117,13 +1079,12 @@ function ListaImoveis({ aoEditar, onToast }) {
   );
 }
 
-// ─── Kanban de Leads ───────────────────────────────────────────────────────
 function ListaLeads() {
   const [leads, setLeads] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [arrastando, setArrastando] = useState(null);
   const [sobreColuna, setSobreColuna] = useState(null);
-  const [modoVisu, setModoVisu] = useState("kanban"); // "kanban" | "lista"
+  const [modoVisu, setModoVisu] = useState("kanban");
   const [expandidoIds, setExpandidoIds] = useState(new Set());
   const [emailVisivelIds, setEmailVisivelIds] = useState(new Set());
 
@@ -1147,10 +1108,10 @@ function ListaLeads() {
   ];
 
   const COR_MAP = {
-    blue:    { badge: "bg-blue-50 text-blue-700 border-blue-200",    col: "border-blue-200",    header: "text-blue-700",    drop: "bg-blue-50 border-blue-300"    },
-    amber:   { badge: "bg-amber-50 text-amber-700 border-amber-200", col: "border-amber-200",   header: "text-amber-700",   drop: "bg-amber-50 border-amber-300"   },
-    emerald: { badge: "bg-emerald-50 text-emerald-700 border-emerald-200", col: "border-emerald-200", header: "text-emerald-700", drop: "bg-emerald-50 border-emerald-300" },
-    red:     { badge: "bg-red-50 text-red-700 border-red-200",       col: "border-red-200",     header: "text-red-700",     drop: "bg-red-50 border-red-300"       },
+    blue:    { badge: "bg-blue-600/10 text-blue-400 border-blue-500/20",    col: "border-blue-500/20",    header: "text-blue-400",    drop: "bg-blue-600/10 border-blue-500/30"    },
+    amber:   { badge: "bg-amber-500/10 text-amber-400 border-amber-500/20", col: "border-amber-500/20",   header: "text-amber-400",   drop: "bg-amber-500/10 border-amber-500/30"   },
+    emerald: { badge: "bg-emerald-600/10 text-emerald-400 border-emerald-500/20", col: "border-emerald-500/20", header: "text-emerald-400", drop: "bg-emerald-600/10 border-emerald-500/30" },
+    red:     { badge: "bg-red-600/10 text-red-400 border-red-500/20",       col: "border-red-500/20",     header: "text-red-400",     drop: "bg-red-600/10 border-red-500/30"       },
   };
 
   useEffect(() => { buscarLeads(); }, []);
@@ -1165,7 +1126,6 @@ function ListaLeads() {
 
   const atualizarStatus = async (id, novoStatus) => {
     const token = sessionStorage.getItem("tokenImobiliaria");
-    // Atualização otimista
     setLeads(prev => prev.map(l => l.id === id ? { ...l, status: novoStatus } : l));
     try {
       await fetch(`${API}/api/leads/${id}/`, {
@@ -1199,7 +1159,6 @@ function ListaLeads() {
     return "bg-slate-100 text-slate-600 border-slate-200";
   };
 
-  // ── Drag & Drop ──────────────────────────────────────────────────────────
   const onDragStart = (e, id) => {
     setArrastando(id);
     e.dataTransfer.effectAllowed = "move";
@@ -1225,24 +1184,21 @@ function ListaLeads() {
 
   return (
     <div className="step-animate">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 tracking-tight">Gestão de Leads</h1>
+          <h1 className="text-xl font-bold text-white tracking-tight">Gestão de Leads</h1>
           <p className="text-slate-500 text-xs mt-0.5">
             {modoVisu === "kanban" ? "Arraste os cards para mover entre etapas" : "Visualizando todos os contatos em lista"}
           </p>
         </div>
 
-        {/* Controles: toggle + contador */}
         <div className="flex items-center gap-3">
-          {/* Toggle de visualização */}
-          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl p-1 gap-1">
+          <div className="flex items-center bg-[#0b1525] border border-white/8 rounded-xl p-1 gap-1">
             <button
               onClick={() => setModoVisu("kanban")}
               title="Modo Kanban"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all ${modoVisu === "kanban"
-                ? "bg-blue-100 text-blue-700 border border-blue-200"
+                ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
                 : "text-slate-500 hover:text-slate-700"
                 }`}
             >
@@ -1257,7 +1213,7 @@ function ListaLeads() {
               onClick={() => setModoVisu("lista")}
               title="Modo Lista"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all ${modoVisu === "lista"
-                ? "bg-blue-100 text-blue-700 border border-blue-200"
+                ? "bg-blue-600/20 text-blue-400 border border-blue-500/30"
                 : "text-slate-500 hover:text-slate-700"
                 }`}
             >
@@ -1273,13 +1229,12 @@ function ListaLeads() {
             </button>
           </div>
 
-          <span className="bg-blue-50 text-blue-600 py-1.5 px-3 rounded-full text-xs font-bold border border-blue-200">
+          <span className="bg-blue-600/10 text-blue-400 py-1.5 px-3 rounded-full text-xs font-bold border border-blue-500/20">
             {total} contato{total !== 1 ? "s" : ""}
           </span>
         </div>
       </div>
 
-      {/* ── MODO KANBAN ────────────────────────────────────────────────── */}
       {modoVisu === "kanban" && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
           {COLUNAS.map(({ key, label, cor, icone }) => {
@@ -1293,9 +1248,9 @@ function ListaLeads() {
                 onDragOver={(e) => onDragOver(e, key)}
                 onDrop={(e) => onDrop(e, key)}
                 onDragLeave={() => setSobreColuna(null)}
-                className={`flex flex-col rounded-2xl border transition-all duration-200 ${eAlvo ? `${cores.drop} border-dashed` : "bg-slate-100/80 border-slate-200"}`}
+                className={`flex flex-col rounded-2xl border transition-all duration-200 ${eAlvo ? `${cores.drop} border-dashed` : "bg-[#0b1525]/80 border-white/8"}`}
               >
-                <div className="px-4 py-3 flex items-center justify-between border-b border-slate-200">
+                <div className="px-4 py-3 flex items-center justify-between border-b border-white/8">
                   <div className="flex items-center gap-2">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={cores.header}>{icone}</svg>
                     <span className={`text-[11px] font-bold uppercase tracking-widest ${cores.header}`}>{label}</span>
@@ -1304,7 +1259,7 @@ function ListaLeads() {
                 </div>
                 <div className="p-3 flex flex-col gap-3 min-h-[120px]">
                   {colLeads.length === 0 && (
-                    <div className={`flex-1 border-2 border-dashed rounded-xl flex items-center justify-center py-8 transition-all ${eAlvo ? "border-current opacity-40" : "border-slate-200/50 opacity-30"}`}>
+                    <div className={`flex-1 border-2 border-dashed rounded-xl flex items-center justify-center py-8 transition-all ${eAlvo ? "border-current opacity-40" : "border-white/10 opacity-30"}`}>
                       <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">Solte aqui</p>
                     </div>
                   )}
@@ -1319,13 +1274,12 @@ function ListaLeads() {
                       draggable
                       onDragStart={(e) => onDragStart(e, lead.id)}
                       onDragEnd={onDragEnd}
-                      style={{ maxWidth: "280px", border: "0.5px solid #e2e8f0", borderRadius: "12px" }}
-                      className={`w-full bg-white overflow-hidden shadow-sm cursor-grab active:cursor-grabbing transition-all duration-150 select-none
-                        ${arrastando === lead.id ? "opacity-40 scale-95" : "hover:shadow-md hover:border-slate-300"}`}
+                      style={{ maxWidth: "280px", border: "0.5px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}
+                      className={`w-full bg-[#0e1829] overflow-hidden shadow-sm cursor-grab active:cursor-grabbing transition-all duration-150 select-none
+                        ${arrastando === lead.id ? "opacity-40 scale-95" : "hover:shadow-md hover:border-white/20"}`}
                     >
-                      {/* ── Header (clicável para colapsar/expandir) ── */}
                       <div
-                        style={{ background: "#E6F1FB", padding: "12px 14px", cursor: "pointer" }}
+                        style={{ background: "#0c2040", padding: "12px 14px", cursor: "pointer" }}
                         className="flex items-center gap-2.5"
                         onMouseDown={(e) => e.stopPropagation()}
                         onClick={(e) => { e.stopPropagation(); toggleExpandir(lead.id); }}
@@ -1337,8 +1291,8 @@ function ListaLeads() {
                           {iniciais}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p style={{ color: "#0C447C", fontWeight: 500, fontSize: 13, lineHeight: "1.3" }} className="truncate">{lead.nome}</p>
-                          <p style={{ color: "#185FA5", fontSize: 11, lineHeight: "1.3" }} className="truncate mt-0.5">{lead.email || "—"}</p>
+                          <p style={{ color: "#93c5fd", fontWeight: 500, fontSize: 13, lineHeight: "1.3" }} className="truncate">{lead.nome}</p>
+                          <p style={{ color: "#60a5fa", fontSize: 11, lineHeight: "1.3" }} className="truncate mt-0.5">{lead.email || "—"}</p>
                         </div>
                         <svg
                           width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -1350,45 +1304,43 @@ function ListaLeads() {
                         </svg>
                       </div>
 
-                      {/* ── Body + Footer com transição suave ── */}
                       <div style={{
                         maxHeight: aberto ? "400px" : "0px",
                         overflow: "hidden",
-                        transition: "max-height 200ms ease"
+                        transition: "max-height 200ms ease",
+                        background: "#0e1829"
                       }}>
-                        {/* Body */}
-                        <div style={{ padding: "10px 14px" }} className="space-y-2">
+                        <div style={{ padding: "10px 14px", background: "#0e1829" }} className="space-y-2">
                           <div className="flex items-center justify-between gap-2">
                             <span style={{ fontSize: 11, color: "#64748b" }}>Imóvel</span>
-                            <span style={{ fontSize: 12, fontWeight: 500, color: "#1e293b" }} className="truncate max-w-[160px] text-right">{lead.imovel_titulo || "—"}</span>
+                            <span style={{ fontSize: 12, fontWeight: 500, color: "#cbd5e1" }} className="truncate max-w-[160px] text-right">{lead.imovel_titulo || "—"}</span>
                           </div>
                           <div className="flex items-center justify-between gap-2">
                             <span style={{ fontSize: 11, color: "#64748b" }}>Telefone</span>
-                            <span style={{ fontSize: 12, fontWeight: 500, color: "#1e293b" }}>{lead.telefone || "—"}</span>
+                            <span style={{ fontSize: 12, fontWeight: 500, color: "#cbd5e1" }}>{lead.telefone || "—"}</span>
                           </div>
                           <div className="flex items-center justify-between gap-2">
                             <span style={{ fontSize: 11, color: "#64748b" }}>Visita agendada</span>
                             {lead.melhor_horario
-                              ? <span style={{ background: "#FAEEDA", color: "#633806", fontSize: 11, fontWeight: 500, padding: "3px 8px", borderRadius: 20 }} className="whitespace-nowrap">{lead.melhor_horario}</span>
+                              ? <span style={{ background: "rgba(245,158,11,0.15)", color: "#fbbf24", border: "0.5px solid rgba(245,158,11,0.3)", fontSize: 11, fontWeight: 500, padding: "3px 8px", borderRadius: 20 }} className="whitespace-nowrap">{lead.melhor_horario}</span>
                               : <span style={{ fontSize: 12, fontWeight: 500, color: "#94a3b8" }}>—</span>
                             }
                           </div>
                           {lead.mensagem && (
-                            <div style={{ borderTop: "0.5px solid #e2e8f0", paddingTop: 8, marginTop: 4 }}>
+                            <div style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)", paddingTop: 8, marginTop: 4 }}>
                               <p style={{ fontSize: 10, fontWeight: 500, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 3 }}>Mensagem do cliente:</p>
                               <p style={{ fontSize: 11, color: "#94a3b8", fontStyle: "italic" }} className="leading-snug line-clamp-2">"{lead.mensagem}"</p>
                             </div>
                           )}
                         </div>
 
-                        {/* Footer */}
-                        <div style={{ borderTop: "0.5px solid #e2e8f0", padding: "8px 14px" }} className="flex gap-2">
+                        <div style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)", padding: "8px 14px", background: "#0e1829" }} className="flex gap-2">
                           <button
                             onMouseDown={(e) => e.stopPropagation()}
                             onClick={(e) => { e.stopPropagation(); abrirWhatsApp(lead.telefone, lead.nome, lead.imovel_titulo); }}
-                            style={{ flex: 1, border: "1.5px solid #22C55E", borderRadius: 8, background: "#fff", fontSize: 11, fontWeight: 500, color: "#22C55E", padding: "6px 0", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = "#F0FDF4"}
-                            onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
+                            style={{ flex: 1, border: "1.5px solid #22C55E", borderRadius: 8, background: "#0b1525", fontSize: 11, fontWeight: 500, color: "#22C55E", padding: "6px 0", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = "#052e16"}
+                            onMouseLeave={(e) => e.currentTarget.style.background = "#0b1525"}
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="#22C55E"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.534 5.858L.057 23.057a.5.5 0 00.61.61l5.199-1.477A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.891 0-3.667-.52-5.183-1.427l-.372-.222-3.862 1.098 1.098-3.862-.222-.372A9.956 9.956 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
                             WhatsApp
@@ -1396,9 +1348,9 @@ function ListaLeads() {
                           <button
                             onMouseDown={(e) => e.stopPropagation()}
                             onClick={(e) => { e.stopPropagation(); if (lead.email) window.open(`mailto:${lead.email}`, "_blank"); }}
-                            style={{ flex: 1, border: "1.5px solid #3B82F6", borderRadius: 8, background: "#fff", fontSize: 11, fontWeight: 500, color: "#3B82F6", padding: "6px 0", cursor: lead.email ? "pointer" : "default", opacity: lead.email ? 1 : 0.4, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
-                            onMouseEnter={(e) => { if (lead.email) e.currentTarget.style.background = "#EFF6FF"; }}
-                            onMouseLeave={(e) => e.currentTarget.style.background = "#fff"}
+                            style={{ flex: 1, border: "1.5px solid #3B82F6", borderRadius: 8, background: "#0b1525", fontSize: 11, fontWeight: 500, color: "#3B82F6", padding: "6px 0", cursor: lead.email ? "pointer" : "default", opacity: lead.email ? 1 : 0.4, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+                            onMouseEnter={(e) => { if (lead.email) e.currentTarget.style.background = "#0c2040"; }}
+                            onMouseLeave={(e) => e.currentTarget.style.background = "#0b1525"}
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             E-mail
@@ -1415,11 +1367,9 @@ function ListaLeads() {
         </div>
       )}
 
-      {/* ── MODO LISTA ─────────────────────────────────────────────────── */}
       {modoVisu === "lista" && leads.length > 0 && (
-        <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xl shadow-slate-200">
-          {/* Cabeçalho */}
-          <div className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center border-b border-slate-200 px-4 py-2.5 bg-slate-50 text-[10px] uppercase tracking-widest text-slate-500 font-bold gap-3">
+        <div className="bg-[#0e1829] border border-white/8 rounded-2xl overflow-hidden shadow-xl shadow-black/20">
+          <div className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center border-b border-white/8 px-4 py-2.5 bg-[#0b1525] text-[10px] uppercase tracking-widest text-slate-400 font-bold gap-3">
             <span>Cliente</span>
             <span className="hidden sm:block w-32 text-center">Imóvel</span>
             <span className="w-28 text-center">Status</span>
@@ -1427,15 +1377,14 @@ function ListaLeads() {
             <span className="w-20 text-right">Ação</span>
           </div>
 
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-white/8">
             {leads.map(lead => {
               const col = COLUNAS.find(c => c.key === lead.status) || COLUNAS[0];
               const cores = COR_MAP[col.cor];
               const expandido = expandidoIds.has(lead.id);
               return (
                 <div key={lead.id}>
-                  {/* ── Linha compacta ── */}
-                  <div className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center px-4 py-2.5 hover:bg-slate-50 transition-colors gap-3">
+                  <div className="grid grid-cols-[1fr_auto_auto_auto_auto] items-center px-4 py-2.5 hover:bg-white/5 transition-colors gap-3">
                     <div className="flex items-center gap-2 min-w-0">
                       <button
                         onClick={() => toggleExpandir(lead.id)}
@@ -1447,12 +1396,12 @@ function ListaLeads() {
                         </svg>
                       </button>
                       <div className="min-w-0">
-                        <p className="font-bold text-slate-800 text-sm truncate">{lead.nome}</p>
+                        <p className="font-bold text-white text-sm truncate">{lead.nome}</p>
                         <p className="text-[11px] text-slate-500 truncate">{lead.telefone}</p>
                       </div>
                     </div>
                     <span className="hidden sm:block w-32 text-center">
-                      <span className="bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded truncate block max-w-full">{lead.imovel_titulo}</span>
+                      <span className="bg-white/5 border border-white/10 text-slate-400 text-[10px] font-semibold tracking-wide uppercase px-2 py-0.5 rounded truncate block max-w-full">{lead.imovel_titulo}</span>
                     </span>
                     <div className="w-28">
                       <select
@@ -1477,9 +1426,8 @@ function ListaLeads() {
                     </div>
                   </div>
 
-                  {/* ── Detalhes expandidos ── */}
                   {expandido && (
-                    <div className="px-5 pb-4 pt-1 bg-slate-50 border-t border-slate-100">
+                    <div className="px-5 pb-4 pt-1 bg-[#0b1525]/50 border-t border-white/8">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-xs">
                         {lead.email && (
                           <div className="flex items-center gap-2">
@@ -1504,9 +1452,9 @@ function ListaLeads() {
                           <span className="text-slate-600 font-mono">{lead.data_criacao}</span>
                         </div>
                         {lead.mensagem && (
-                          <div className="flex items-start gap-2 sm:col-span-2 pt-1 border-t border-slate-200 mt-1">
+                          <div className="flex items-start gap-2 sm:col-span-2 pt-1 border-t border-white/8 mt-1">
                             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 w-24 shrink-0 pt-0.5">Mensagem:</span>
-                            <p className="text-slate-600 italic leading-relaxed">"{lead.mensagem}"</p>
+                            <p className="text-slate-400 italic leading-relaxed">"{lead.mensagem}"</p>
                           </div>
                         )}
                       </div>
@@ -1519,9 +1467,8 @@ function ListaLeads() {
         </div>
       )}
 
-      {/* ── Estado vazio (compartilhado) ────────────────────────────── */}
       {total === 0 && (
-        <div className="text-center py-24 text-slate-600 border-2 border-dashed border-slate-200/50 rounded-2xl mt-4">
+        <div className="text-center py-24 text-slate-400 border-2 border-dashed border-white/10 rounded-2xl mt-4">
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto mb-3 text-slate-700"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
           <p className="font-bold text-sm">Nenhum contato recebido ainda</p>
           <p className="text-xs mt-1 text-slate-700">Os leads aparecerão aqui quando alguém entrar em contato.</p>
@@ -1531,9 +1478,7 @@ function ListaLeads() {
   );
 }
 
-// ─── Configurações do Painel ────────────────────────────────────────────────
 function ConfiguracoesPainel() {
-  // ── Estados — Gerenciar Imóveis ───────────────────────────────────────────
   const [listandoImoveis, setListandoImoveis] = useState(false);
   const [imoveisLista, setImoveisLista] = useState([]);
   const [carregandoImoveis, setCarregandoImoveis] = useState(false);
@@ -1541,7 +1486,6 @@ function ConfiguracoesPainel() {
   const [excluindoId, setExcluindoId] = useState(null);
   const [resultadoExclusao, setResultadoExclusao] = useState(null);
 
-  // ── Estados — Gerenciar Leads ─────────────────────────────────────────────
   const [listandoLeads, setListandoLeads] = useState(false);
   const [leadsLista, setLeadsLista] = useState([]);
   const [carregandoLeads, setCarregandoLeads] = useState(false);
@@ -1549,7 +1493,6 @@ function ConfiguracoesPainel() {
   const [excluindoLeadId, setExcluindoLeadId] = useState(null);
   const [resultadoExclusaoLead, setResultadoExclusaoLead] = useState(null);
 
-  // ── Imóveis ───────────────────────────────────────────────────────────────
   const carregarImoveis = async () => {
     setCarregandoImoveis(true);
     setResultadoExclusao(null);
@@ -1589,7 +1532,6 @@ function ConfiguracoesPainel() {
     }
   };
 
-  // ── Leads ─────────────────────────────────────────────────────────────────
   const carregarLeads = async () => {
     setCarregandoLeads(true);
     setResultadoExclusaoLead(null);
@@ -1631,15 +1573,13 @@ function ConfiguracoesPainel() {
 
   return (
     <div className="max-w-2xl mx-auto step-animate">
-      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-xl font-bold text-slate-800 tracking-tight">Configurações do Painel</h1>
+        <h1 className="text-xl font-bold text-white tracking-tight">Configurações do Painel</h1>
         <p className="text-slate-500 text-xs mt-1">Gerencie as configurações e dados do sistema.</p>
       </div>
 
-      {/* Card — Gerenciar Leads */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xl shadow-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200/60 bg-slate-50/50">
+      <div className="bg-[#0e1829] border border-white/8 rounded-2xl overflow-hidden shadow-xl shadow-black/20">
+        <div className="px-6 py-4 border-b border-white/8 bg-[#0b1525]/50">
           <div className="flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
@@ -1652,7 +1592,7 @@ function ConfiguracoesPainel() {
           {!listandoLeads ? (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-bold text-slate-800">Excluir lead da base de dados</p>
+                <p className="text-sm font-bold text-white">Excluir lead da base de dados</p>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                   Selecione um contato para removê-lo permanentemente.
                   <span className="text-amber-600/80 font-semibold"> Esta ação não pode ser desfeita.</span>
@@ -1661,7 +1601,7 @@ function ConfiguracoesPainel() {
               <button
                 onClick={carregarLeads}
                 disabled={carregandoLeads}
-                className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold uppercase tracking-wide transition-all disabled:opacity-50"
+                className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-white/8 hover:bg-white/12 text-slate-200 border border-white/10 hover:border-white/20 rounded-xl text-xs font-bold uppercase tracking-wide transition-all disabled:opacity-50"
               >
                 {carregandoLeads ? (
                   <><div className="w-3 h-3 border-2 border-slate-400/30 border-t-slate-300 rounded-full animate-spin" /> Carregando...</>
@@ -1689,16 +1629,16 @@ function ConfiguracoesPainel() {
                   {leadsLista.map((lead) => (
                     <div
                       key={lead.id}
-                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-slate-100 border border-slate-200/60"
+                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/8"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-lg bg-slate-100 shrink-0 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-lg bg-white/8 shrink-0 flex items-center justify-center">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-500">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
                           </svg>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-slate-700 text-xs font-semibold truncate">{lead.nome}</p>
+                          <p className="text-slate-200 text-xs font-semibold truncate">{lead.nome}</p>
                           <p className="text-slate-500 text-[10px] truncate">{lead.imovel_titulo} · {lead.telefone}</p>
                         </div>
                       </div>
@@ -1708,7 +1648,7 @@ function ConfiguracoesPainel() {
                           <p className="text-[10px] text-amber-600 font-semibold hidden sm:block">Tem certeza?</p>
                           <button
                             onClick={() => setConfirmandoExclusaoLeadId(null)}
-                            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200 transition-all"
+                            className="px-2.5 py-1.5 bg-white/8 hover:bg-white/12 text-slate-300 text-[10px] font-bold rounded-lg border border-white/10 transition-all"
                           >
                             Cancelar
                           </button>
@@ -1755,10 +1695,8 @@ function ConfiguracoesPainel() {
         </div>
       </div>
 
-      {/* Card — Excluir Imóveis */}
-      <div className="mt-5 bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xl shadow-slate-200">
-        {/* Card Header */}
-        <div className="px-6 py-4 border-b border-slate-200/60 bg-slate-50/50">
+      <div className="mt-5 bg-[#0e1829] border border-white/8 rounded-2xl overflow-hidden shadow-xl shadow-black/20">
+        <div className="px-6 py-4 border-b border-white/8 bg-[#0b1525]/50">
           <div className="flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
@@ -1768,11 +1706,10 @@ function ConfiguracoesPainel() {
         </div>
 
         <div className="p-6">
-          {/* Ação: listar imóveis */}
           {!listandoImoveis ? (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-bold text-slate-800">Excluir imóvel da base de dados</p>
+                <p className="text-sm font-bold text-white">Excluir imóvel da base de dados</p>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                   Selecione um imóvel para removê-lo permanentemente.
                   <span className="text-amber-600/80 font-semibold"> Esta ação não pode ser desfeita.</span>
@@ -1781,7 +1718,7 @@ function ConfiguracoesPainel() {
               <button
                 onClick={carregarImoveis}
                 disabled={carregandoImoveis}
-                className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold uppercase tracking-wide transition-all disabled:opacity-50"
+                className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-white/8 hover:bg-white/12 text-slate-200 border border-white/10 hover:border-white/20 rounded-xl text-xs font-bold uppercase tracking-wide transition-all disabled:opacity-50"
               >
                 {carregandoImoveis ? (
                   <><div className="w-3 h-3 border-2 border-slate-400/30 border-t-slate-300 rounded-full animate-spin" /> Carregando...</>
@@ -1809,20 +1746,20 @@ function ConfiguracoesPainel() {
                   {imoveisLista.map((im) => (
                     <div
                       key={im.id}
-                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-slate-100 border border-slate-200/60"
+                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/8"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         {im.capa ? (
-                          <img src={im.capa} alt={im.titulo} className="w-10 h-10 rounded-lg object-cover shrink-0 border border-slate-200" />
+                          <img src={im.capa} alt={im.titulo} className="w-10 h-10 rounded-lg object-cover shrink-0 border border-white/10" />
                         ) : (
-                          <div className="w-10 h-10 rounded-lg bg-slate-100 shrink-0 flex items-center justify-center">
+                          <div className="w-10 h-10 rounded-lg bg-white/8 shrink-0 flex items-center justify-center">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-slate-600">
                               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
                             </svg>
                           </div>
                         )}
                         <div className="min-w-0">
-                          <p className="text-slate-700 text-xs font-semibold truncate">{im.titulo}</p>
+                          <p className="text-slate-200 text-xs font-semibold truncate">{im.titulo}</p>
                           <p className="text-slate-500 text-[10px] truncate">{im.bairro}{im.cidade ? `, ${im.cidade}` : ""}</p>
                         </div>
                       </div>
@@ -1832,7 +1769,7 @@ function ConfiguracoesPainel() {
                           <p className="text-[10px] text-amber-600 font-semibold hidden sm:block">Tem certeza?</p>
                           <button
                             onClick={() => setConfirmandoExclusaoId(null)}
-                            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200 transition-all"
+                            className="px-2.5 py-1.5 bg-white/8 hover:bg-white/12 text-slate-300 text-[10px] font-bold rounded-lg border border-white/10 transition-all"
                           >
                             Cancelar
                           </button>
@@ -1866,7 +1803,6 @@ function ConfiguracoesPainel() {
             </div>
           )}
 
-          {/* Feedback exclusão */}
           {resultadoExclusao && (
             <div className={`mt-4 flex items-center gap-2.5 px-4 py-3 rounded-xl border text-xs font-semibold ${resultadoExclusao.tipo === "sucesso" ? "bg-emerald-50 border-emerald-200 text-emerald-700" : "bg-red-50 border-red-200 text-red-700"}`}>
               {resultadoExclusao.tipo === "sucesso" ? (
@@ -1883,7 +1819,6 @@ function ConfiguracoesPainel() {
   );
 }
 
-// ─── Gerenciar Usuários ────────────────────────────────────────────────────
 function GerenciarUsuarios({ onToast, onErroAuth }) {
   const [usuarios, setUsuarios] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -1959,22 +1894,20 @@ function GerenciarUsuarios({ onToast, onErroAuth }) {
     }
   };
 
-  const inputClass = "w-full bg-white border border-slate-200 px-3 py-2.5 rounded-xl text-slate-800 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all placeholder:text-slate-400";
+  const inputClass = "w-full bg-[#0b1525] border border-white/10 px-3 py-2.5 rounded-xl text-slate-100 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all placeholder:text-slate-500";
   const labelClass = "block text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1.5";
 
   return (
     <div className="space-y-5">
-      {/* Criar novo usuário */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xl shadow-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200/60 bg-slate-50/50 flex items-center gap-2">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600">
+      <div className="bg-[#0e1829] border border-white/8 rounded-2xl overflow-hidden shadow-xl shadow-black/20">
+        <div className="px-6 py-4 border-b border-white/8 bg-[#0b1525]/50 flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><line x1="19" y1="8" x2="19" y2="14" /><line x1="22" y1="11" x2="16" y2="11" />
           </svg>
           <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest">Criar Novo Usuário</h2>
         </div>
         <div className="p-6">
           <form onSubmit={criarUsuario} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Inputs falsos para impedir o gerenciador de senhas do navegador */}
             <input type="text" style={{ display: "none" }} autoComplete="username" readOnly />
             <input type="password" style={{ display: "none" }} autoComplete="new-password" readOnly />
             <div>
@@ -2029,16 +1962,15 @@ function GerenciarUsuarios({ onToast, onErroAuth }) {
         </div>
       </div>
 
-      {/* Lista de usuários */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xl shadow-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200/60 bg-slate-50/50 flex items-center justify-between">
+      <div className="bg-[#0e1829] border border-white/8 rounded-2xl overflow-hidden shadow-xl shadow-black/20">
+        <div className="px-6 py-4 border-b border-white/8 bg-[#0b1525]/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
             <h2 className="text-xs font-bold text-slate-300 uppercase tracking-widest">Usuários Cadastrados</h2>
           </div>
-          <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-bold px-2.5 py-1 rounded-full">
+          <span className="bg-blue-600/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold px-2.5 py-1 rounded-full">
             {usuarios.length} usuário{usuarios.length !== 1 ? "s" : ""}
           </span>
         </div>
@@ -2046,7 +1978,7 @@ function GerenciarUsuarios({ onToast, onErroAuth }) {
         <div className="p-6">
           {carregando ? (
             <div className="flex items-center justify-center py-10 gap-2 text-slate-500 text-xs">
-              <div className="w-4 h-4 border-2 border-slate-600 border-t-blue-500 rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-white/20 border-t-blue-400 rounded-full animate-spin" />
               Carregando usuários...
             </div>
           ) : usuarios.length === 0 ? (
@@ -2054,26 +1986,26 @@ function GerenciarUsuarios({ onToast, onErroAuth }) {
           ) : (
             <div className="flex flex-col gap-2">
               {usuarios.map(u => (
-                <div key={u.id} className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-slate-100 border border-slate-200/60">
+                <div key={u.id} className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-white/5 border border-white/8">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-sm font-bold ${u.protegido ? "bg-blue-600/20 border border-blue-500/40 text-blue-600" : "bg-slate-100 border border-slate-200 text-slate-500"}`}>
+                    <div className={`w-9 h-9 rounded-full shrink-0 flex items-center justify-center text-sm font-bold ${u.protegido ? "bg-blue-600/20 border border-blue-500/40 text-blue-600" : "bg-white/8 border border-white/10 text-slate-400"}`}>
                       {u.username[0].toUpperCase()}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-slate-800 text-sm font-semibold truncate">{u.username}</p>
+                        <p className="text-white text-sm font-semibold truncate">{u.username}</p>
                         {u.protegido && (
-                          <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                          <span className="bg-blue-600/10 text-blue-400 border border-blue-500/20 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
                             Protegido
                           </span>
                         )}
                         {u.is_superuser && (
-                          <span className="bg-amber-50 text-amber-700 border border-amber-200 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                          <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
                             Superuser
                           </span>
                         )}
                         {u.is_staff && !u.is_superuser && (
-                          <span className="bg-slate-100 text-slate-500 border border-slate-200 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                          <span className="bg-white/5 text-slate-400 border border-white/10 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
                             Staff
                           </span>
                         )}
@@ -2086,7 +2018,7 @@ function GerenciarUsuarios({ onToast, onErroAuth }) {
                   </div>
 
                   {u.protegido ? (
-                    <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-slate-400 text-[10px] font-bold cursor-not-allowed select-none">
+                    <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-500 text-[10px] font-bold cursor-not-allowed select-none">
                       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                       Protegido
                     </div>
@@ -2095,7 +2027,7 @@ function GerenciarUsuarios({ onToast, onErroAuth }) {
                       <p className="text-[10px] text-amber-600 font-semibold hidden sm:block">Tem certeza?</p>
                       <button
                         onClick={() => setConfirmandoId(null)}
-                        className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200 transition-all"
+                        className="px-2.5 py-1.5 bg-white/8 hover:bg-white/12 text-slate-300 text-[10px] font-bold rounded-lg border border-white/10 transition-all"
                       >
                         Cancelar
                       </button>
@@ -2132,7 +2064,6 @@ function GerenciarUsuarios({ onToast, onErroAuth }) {
   );
 }
 
-// ─── Painel Inicial ────────────────────────────────────────────────────────
 function PainelInicio({ irPara }) {
   const [stats, setStats] = useState({ imoveis: null, imoveisAtivos: null, leads: null, leadsNovos: null, usuarios: null });
 
@@ -2155,10 +2086,10 @@ function PainelInicio({ irPara }) {
   }, []);
 
   const corMap = {
-    blue:    { bg: "bg-blue-50",    border: "border-blue-400",    text: "text-blue-600"    },
-    emerald: { bg: "bg-emerald-50", border: "border-emerald-400", text: "text-emerald-700" },
-    violet:  { bg: "bg-violet-50",  border: "border-violet-400",  text: "text-violet-600"  },
-    slate:   { bg: "bg-slate-100",  border: "border-slate-400",   text: "text-slate-600"   },
+    blue:    { bg: "bg-blue-600/10",    border: "border-blue-500/30",    text: "text-blue-400",    iconBg: "bg-blue-600/15"    },
+    emerald: { bg: "bg-emerald-600/10", border: "border-emerald-500/30", text: "text-emerald-400", iconBg: "bg-emerald-600/15" },
+    violet:  { bg: "bg-violet-600/10",  border: "border-violet-500/30",  text: "text-violet-400",  iconBg: "bg-violet-600/15"  },
+    slate:   { bg: "bg-white/5",        border: "border-white/10",       text: "text-slate-400",   iconBg: "bg-white/8"        },
   };
 
   const cards = [
@@ -2183,8 +2114,8 @@ function PainelInicio({ irPara }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-7 shadow-xl shadow-slate-200">
-        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Nexus Admin</h1>
+      <div className="bg-[#0e1829] border border-white/8 rounded-2xl p-7 shadow-xl shadow-black/30">
+        <h1 className="text-2xl font-bold text-white tracking-tight">Nexus Admin</h1>
         <p className="text-slate-400 text-sm mt-1.5">Visão geral do sistema. Selecione uma ação abaixo ou use o menu lateral.</p>
       </div>
 
@@ -2193,16 +2124,16 @@ function PainelInicio({ irPara }) {
           const c = corMap[cor];
           return (
             <button key={key} onClick={() => irPara(key)}
-              className={`text-left bg-white border ${c.border} rounded-2xl p-5 shadow-lg shadow-slate-200 hover:bg-slate-50 transition-all group`}>
+              className={`text-left bg-[#0e1829] border ${c.border} rounded-2xl p-5 shadow-lg shadow-black/20 hover:bg-[#0b1525] transition-all group`}>
               <div className="flex items-center justify-between mb-4">
-                <div className={`w-9 h-9 rounded-xl ${c.bg} border ${c.border} flex items-center justify-center`}>
+                <div className={`w-9 h-9 rounded-xl ${c.iconBg} border ${c.border} flex items-center justify-center`}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={c.text}>{icon}</svg>
                 </div>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-slate-600 group-hover:text-slate-400 transition-colors"><polyline points="9 18 15 12 9 6" /></svg>
               </div>
               <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-1">{label}</p>
-              <p className="text-3xl font-bold text-slate-800">
-                {valor == null ? <span className="text-slate-400 text-lg animate-pulse">—</span> : valor}
+              <p className="text-3xl font-bold text-white">
+                {valor == null ? <span className="text-slate-500 text-lg animate-pulse">—</span> : valor}
               </p>
               {sub && <p className={`text-xs font-semibold mt-1 ${c.text}`}>{sub}</p>}
             </button>
@@ -2210,8 +2141,8 @@ function PainelInicio({ irPara }) {
         })}
       </div>
 
-      <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xl shadow-slate-200">
-        <div className="px-6 py-4 border-b border-slate-200/60 bg-slate-50/50">
+      <div className="bg-[#0e1829] border border-white/8 rounded-2xl overflow-hidden shadow-xl shadow-black/20">
+        <div className="px-6 py-4 border-b border-white/8 bg-[#0b1525]">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ações Rápidas</p>
         </div>
         <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -2220,11 +2151,11 @@ function PainelInicio({ irPara }) {
             return (
               <button key={key} onClick={() => irPara(key)}
                 className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border ${c.border} ${c.bg} hover:opacity-80 transition-all text-center`}>
-                <div className={`w-10 h-10 rounded-xl bg-slate-100 border ${c.border} flex items-center justify-center`}>
+                <div className={`w-10 h-10 rounded-xl ${c.iconBg} border ${c.border} flex items-center justify-center`}>
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={c.text}>{icon}</svg>
                 </div>
                 <div>
-                  <p className="text-slate-700 text-xs font-bold leading-tight">{label}</p>
+                  <p className="text-slate-200 text-xs font-bold leading-tight">{label}</p>
                   <p className="text-slate-500 text-[10px] mt-0.5">{desc}</p>
                 </div>
               </button>

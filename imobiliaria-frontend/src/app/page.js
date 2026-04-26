@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,11 +14,6 @@ const SUGESTOES = [
   "Ex: Apartamento com vista para a baía no Marco...",
 ];
 
-const FILTROS_INICIAL = {
-  finalidade: "", tipos: [], precoMin: "", precoMax: "",
-  areaMin: "", areaMax: "", quartos: "", suites: "", banheiros: "", vagas: "",
-};
-
 const LISTA_COMODIDADES = [
   "Piscina", "Academia", "Churrasqueira", "Salão de Festas", "Playground",
   "Brinquedoteca", "Portaria 24h", "Elevador", "Varanda / Sacada",
@@ -27,7 +22,6 @@ const LISTA_COMODIDADES = [
   "Cozinha Americana", "Interfone", "Portão Eletrônico", "Sistema de Segurança", "Gerador",
 ];
 
-/* ── Ícones ────────────────────────────────────────────────────────────────── */
 function IconHome({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6}>
@@ -73,15 +67,6 @@ function IconClose() {
   );
 }
 
-function IconFunnel({ className = "w-3.5 h-3.5" }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round"
-        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
-    </svg>
-  );
-}
-
 function IconBed({ className = "w-4 h-4" }) {
   return (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
@@ -120,183 +105,99 @@ function IconArea({ className = "w-4 h-4" }) {
   );
 }
 
-function formatarMoeda(valor) {
-  const numeros = valor.replace(/\D/g, '');
-  if (!numeros) return '';
-  return Number(numeros).toLocaleString('pt-BR');
+const BAIRROS_BELEM = [
+  "Aeroporto", "Águas Lindas", "Aurá", "Barreiro", "Batista Campos",
+  "Bengui", "Boa Vista", "Cabanagem", "Campina", "Canudos",
+  "Castanheira", "Catu", "Cidade Velha", "Condor", "Coqueiro",
+  "Cremação", "Curió-Utinga", "Diamantino", "Entroncamento", "Fátima",
+  "Fernandes Belo", "Guamá", "Icoaraci", "Jurunas", "Maracangalha",
+  "Marambaia", "Marco", "Mangueirão", "Miramar", "Mosqueiro",
+  "Murubira", "Nambu", "Nazaré", "Outeiro", "Paracuri",
+  "Parque Guajará", "Parque Verde", "Patola", "Pedreira", "Penha",
+  "Pinheiro", "Pratinha", "Providência", "Puraquequara", "Reduto",
+  "Riacho Doce", "Sacramenta", "Satélite", "São Brás", "São Clemente",
+  "São Joaquim", "Sideral", "Souza", "Tapanã", "Telégrafo Sem Fio",
+  "Tenoné", "Terra Firme", "Tucunduba", "Una", "Umarizal",
+  "Val-de-Cans", "Venda Nova", "Vila da Barca", "Xibé",
+];
+
+const PRECO_SLIDER_MAX  = 10000000;
+const PRECO_SLIDER_STEP = 50000;
+
+function fmtFaixa(v) {
+  if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(v % 1000000 === 0 ? 0 : 1).replace(".", ",")}M`;
+  if (v >= 1000)    return `R$ ${(v / 1000).toFixed(0)}k`;
+  return `R$ ${v}`;
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   PAINEL DE FILTROS
-═══════════════════════════════════════════════════════════════════════════ */
-function PainelFiltros({ filtros, setFiltros, onAplicar, onFechar }) {
-  const BotoesOpcao = ({ campo, opcoes }) => (
-    <div className="flex gap-2 flex-wrap">
-      {opcoes.map(v => (
-        <button
-          key={v} type="button"
-          onClick={() => setFiltros(f => ({ ...f, [campo]: f[campo] === v ? "" : v }))}
-          className={`w-10 h-10 rounded-full text-xs font-semibold transition-all border ${
-            filtros[campo] === v
-              ? "bg-blue-600 text-white border-blue-600"
-              : "border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200"
-          }`}
-        >
-          {v}
-        </button>
+function SliderRange({ valMin, valMax, onChange }) {
+  const trackRef = useRef(null);
+
+  const pct = (v) => (v / PRECO_SLIDER_MAX) * 100;
+
+  const fromEvent = (e) => {
+    const rect  = trackRef.current.getBoundingClientRect();
+    const x     = e.touches ? e.touches[0].clientX : e.clientX;
+    const ratio = Math.max(0, Math.min(1, (x - rect.left) / rect.width));
+    return Math.round((ratio * PRECO_SLIDER_MAX) / PRECO_SLIDER_STEP) * PRECO_SLIDER_STEP;
+  };
+
+  const drag = (handle) => (eDown) => {
+    eDown.preventDefault();
+    const onMove = (e) => {
+      const v = fromEvent(e);
+      if (handle === "min") onChange(Math.min(v, valMax - PRECO_SLIDER_STEP), valMax);
+      else                   onChange(valMin, Math.max(v, valMin + PRECO_SLIDER_STEP));
+    };
+    const onUp = () => {
+      window.removeEventListener("mousemove",  onMove);
+      window.removeEventListener("touchmove",  onMove);
+      window.removeEventListener("mouseup",    onUp);
+      window.removeEventListener("touchend",   onUp);
+    };
+    window.addEventListener("mousemove",  onMove);
+    window.addEventListener("touchmove",  onMove, { passive: false });
+    window.addEventListener("mouseup",    onUp);
+    window.addEventListener("touchend",   onUp);
+  };
+
+  return (
+    <div ref={trackRef} className="relative select-none" style={{ height: "20px", margin: "8px 0" }}>
+      <div className="absolute top-1/2 -translate-y-1/2 inset-x-0 h-1.5 rounded-full bg-white/10" />
+      <div
+        className="absolute top-1/2 -translate-y-1/2 h-1.5 rounded-full bg-blue-500"
+        style={{ left: `${pct(valMin)}%`, width: `${pct(valMax) - pct(valMin)}%` }}
+      />
+      {[{ v: valMin, h: "min" }, { v: valMax, h: "max" }].map(({ v, h }) => (
+        <div
+          key={h}
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-blue-600 border-2 border-blue-300 rounded-full shadow-lg cursor-grab active:cursor-grabbing"
+          style={{ left: `${pct(v)}%` }}
+          onMouseDown={drag(h)}
+          onTouchStart={drag(h)}
+        />
       ))}
     </div>
   );
-
-  return (
-    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onFechar} />
-      <div className="relative w-full max-w-lg bg-[#0F172A] border border-slate-700 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
-          <h3 className="text-white font-bold text-sm">Filtros de Busca</h3>
-          <button type="button" onClick={onFechar} className="text-slate-500 hover:text-white transition-colors">
-            <IconClose />
-          </button>
-        </div>
-
-        <div className="overflow-y-auto flex-1 px-5 py-4 space-y-5">
-
-          <div>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Finalidade</p>
-            <div className="flex gap-2">
-              {[
-                { op: "Venda", ativo: "bg-blue-600 border-blue-500 text-white" },
-                { op: "Aluguel", ativo: "bg-emerald-600 border-emerald-500 text-white" },
-              ].map(({ op, ativo }) => (
-                <button
-                  key={op} type="button"
-                  onClick={() => setFiltros(f => ({ ...f, finalidade: f.finalidade === op ? "" : op }))}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-                    filtros.finalidade === op
-                      ? ativo
-                      : "bg-transparent border-slate-700 text-slate-400 hover:border-slate-500"
-                  }`}
-                >
-                  {op}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Tipo de imóvel</p>
-            <div className="grid grid-cols-2 gap-2">
-              {["Apartamento", "Casa", "Terreno", "Sala Comercial"].map(tipo => (
-                <label key={tipo} className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={filtros.tipos.includes(tipo)}
-                    onChange={() => setFiltros(f => ({
-                      ...f,
-                      tipos: f.tipos.includes(tipo)
-                        ? f.tipos.filter(t => t !== tipo)
-                        : [...f.tipos, tipo]
-                    }))}
-                    className="rounded border-slate-600 bg-[#080E1A] text-blue-600 focus:ring-blue-500 focus:ring-offset-0"
-                  />
-                  <span className="text-slate-300 text-xs group-hover:text-white transition-colors">{tipo}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Faixa de preço</p>
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                type="text" inputMode="numeric" placeholder="Mínimo R$"
-                value={filtros.precoMin}
-                onChange={(e) => setFiltros(f => ({ ...f, precoMin: formatarMoeda(e.target.value) }))}
-                className="bg-[#080E1A] border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40"
-              />
-              <input
-                type="text" inputMode="numeric" placeholder="Máximo R$"
-                value={filtros.precoMax}
-                onChange={(e) => setFiltros(f => ({ ...f, precoMax: formatarMoeda(e.target.value) }))}
-                className="bg-[#080E1A] border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40"
-              />
-            </div>
-          </div>
-
-          <div>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Área útil (m²)</p>
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                type="text" inputMode="numeric" placeholder="Área mínima"
-                value={filtros.areaMin}
-                onChange={(e) => setFiltros(f => ({ ...f, areaMin: e.target.value.replace(/\D/g, '') }))}
-                className="bg-[#080E1A] border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40"
-              />
-              <input
-                type="text" inputMode="numeric" placeholder="Área máxima"
-                value={filtros.areaMax}
-                onChange={(e) => setFiltros(f => ({ ...f, areaMax: e.target.value.replace(/\D/g, '') }))}
-                className="bg-[#080E1A] border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40"
-              />
-            </div>
-          </div>
-
-          <div>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Quartos</p>
-            <BotoesOpcao campo="quartos" opcoes={["1", "2", "3", "4+"]} />
-          </div>
-
-          <div>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Suítes</p>
-            <BotoesOpcao campo="suites" opcoes={["0", "1", "2", "3+"]} />
-          </div>
-
-          <div>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Banheiros</p>
-            <BotoesOpcao campo="banheiros" opcoes={["1", "2", "3", "4+"]} />
-          </div>
-
-          <div>
-            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Vagas</p>
-            <BotoesOpcao campo="vagas" opcoes={["0", "1", "2", "3+"]} />
-          </div>
-        </div>
-
-        <div className="px-5 py-4 border-t border-slate-800 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setFiltros(FILTROS_INICIAL)}
-            className="text-slate-400 hover:text-white text-xs font-medium transition-colors whitespace-nowrap"
-          >
-            Limpar tudo
-          </button>
-          <button
-            type="button"
-            onClick={onAplicar}
-            className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all"
-          >
-            Aplicar filtros
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   VITRINE CURADORIA
-═══════════════════════════════════════════════════════════════════════════ */
 function VitrineCuradoria() {
   const [data, setData] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [finalidadeFiltro, setFinalidadeFiltro] = useState("Todos");
   const [tipoFiltro, setTipoFiltro] = useState("");
-  const [quartosFiltro, setQuartosFiltro] = useState("");
-  const [precoMinFiltro, setPrecoMinFiltro] = useState("");
-  const [precoMaxFiltro, setPrecoMaxFiltro] = useState("");
-  const [comodidades, setComodidades] = useState([]);
-  const [mostrarComod, setMostrarComod] = useState(false);
+  const [quartosFiltro, setQuartosFiltro]         = useState("");
+  const [suitesFiltro, setSuitesFiltro]           = useState("");
+  const [mostrarQtsSuites, setMostrarQtsSuites]   = useState(false);
+  const [faixaMin, setFaixaMin]                   = useState(0);
+  const [faixaMax, setFaixaMax]                   = useState(PRECO_SLIDER_MAX);
+  const [mostrarFaixaPreco, setMostrarFaixaPreco] = useState(false);
+  const [bairroFiltro, setBairroFiltro]           = useState("");
+  const [areaMin, setAreaMin]                     = useState("");
+  const [areaMax, setAreaMax]                     = useState("");
+  const [mostrarArea, setMostrarArea]             = useState(false);
+  const [comodidades, setComodidades]             = useState([]);
+  const [mostrarComod, setMostrarComod]           = useState(false);
 
   useEffect(() => {
     fetch(`${API}/api/imoveis/lista/`)
@@ -309,9 +210,19 @@ function VitrineCuradoria() {
   let imoveis = data.filter(im => im.ativo !== false);
   if (finalidadeFiltro !== "Todos") imoveis = imoveis.filter(im => im.finalidade === finalidadeFiltro);
   if (tipoFiltro) imoveis = imoveis.filter(im => im.tipo_imovel === tipoFiltro);
-  if (quartosFiltro) imoveis = imoveis.filter(im => Number(im.quartos) >= Number(quartosFiltro));
-  if (precoMinFiltro) imoveis = imoveis.filter(im => Number(im.preco) >= Number(precoMinFiltro));
-  if (precoMaxFiltro) imoveis = imoveis.filter(im => Number(im.preco) <= Number(precoMaxFiltro));
+  if (quartosFiltro) {
+    if (quartosFiltro === "4+") imoveis = imoveis.filter(im => Number(im.quartos) >= 4);
+    else                         imoveis = imoveis.filter(im => Number(im.quartos) === Number(quartosFiltro));
+  }
+  if (suitesFiltro) {
+    if (suitesFiltro === "4+") imoveis = imoveis.filter(im => Number(im.suites) >= 4);
+    else                        imoveis = imoveis.filter(im => Number(im.suites) === Number(suitesFiltro));
+  }
+  if (faixaMin > 0)                  imoveis = imoveis.filter(im => Number(im.preco) >= faixaMin);
+  if (faixaMax < PRECO_SLIDER_MAX)   imoveis = imoveis.filter(im => Number(im.preco) <= faixaMax);
+  if (bairroFiltro)                  imoveis = imoveis.filter(im => im.bairro && im.bairro.trim().toLowerCase() === bairroFiltro.toLowerCase());
+  if (areaMin)                       imoveis = imoveis.filter(im => im.area_util && Number(im.area_util) >= Number(areaMin));
+  if (areaMax)                       imoveis = imoveis.filter(im => im.area_util && Number(im.area_util) <= Number(areaMax));
   if (comodidades.length > 0) {
     imoveis = imoveis.filter(im => {
       if (!im.comodidades_condominio) return false;
@@ -330,7 +241,6 @@ function VitrineCuradoria() {
     <section className="bg-[#070d1a] pt-12 pb-16">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Cabeçalho da vitrine */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
             <p className="text-blue-400 text-xs font-semibold tracking-widest uppercase mb-1">Curadoria especial</p>
@@ -361,9 +271,8 @@ function VitrineCuradoria() {
           </div>
         </div>
 
-        {/* Barra de filtros */}
         <div className="bg-[#0b1525] border border-white/8 rounded-xl px-4 py-3 flex flex-wrap items-center gap-3 mb-8">
-          {["Apartamento", "Casa", "Sala Comercial", "Terreno"].map(t => (
+          {["Apartamento", "Casa", "Sala Comercial"].map(t => (
             <button key={t} type="button" onClick={() => setTipoFiltro(tipoFiltro === t ? "" : t)}
               className={`text-xs rounded-full px-3 py-1.5 border transition-all ${tipoFiltro === t ? "bg-blue-600/20 border-blue-500/40 text-blue-300 font-medium" : "bg-white/4 border-white/8 text-slate-500 hover:text-slate-300"}`}>
               {t}
@@ -372,29 +281,182 @@ function VitrineCuradoria() {
 
           <div className="w-px h-5 bg-white/10 hidden sm:block" />
 
-          <select value={quartosFiltro} onChange={e => setQuartosFiltro(e.target.value)} className={selectClass}>
-            <option value="">Quartos</option>
-            {["1","2","3","4","5"].map(q => <option key={q} value={q}>{q}+</option>)}
-          </select>
+          <div className="relative">
+            <select value={bairroFiltro} onChange={e => setBairroFiltro(e.target.value)}
+              className={`${selectClass} appearance-none pr-6 max-w-[130px]`}>
+              <option value="">Bairro</option>
+              {BAIRROS_BELEM.map(b => <option key={b} value={b}>{b}</option>)}
+            </select>
+            <div className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">
+              <svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
 
-          <select value={precoMinFiltro} onChange={e => setPrecoMinFiltro(e.target.value)} className={selectClass}>
-            <option value="">Preço mín.</option>
-            <option value="200000">R$ 200mil</option>
-            <option value="500000">R$ 500mil</option>
-            <option value="1000000">R$ 1M</option>
-            <option value="2000000">R$ 2M</option>
-            <option value="3000000">R$ 3M</option>
-          </select>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMostrarFaixaPreco(v => !v)}
+              className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 border transition-all ${
+                faixaMin > 0 || faixaMax < PRECO_SLIDER_MAX
+                  ? "bg-blue-600/20 border-blue-500/40 text-blue-300"
+                  : "bg-[#070d1a] border-white/10 text-slate-400 hover:text-slate-300"
+              }`}
+            >
+              {faixaMin === 0 && faixaMax >= PRECO_SLIDER_MAX
+                ? "Faixa de preço"
+                : `${fmtFaixa(faixaMin)} – ${faixaMax >= PRECO_SLIDER_MAX ? fmtFaixa(PRECO_SLIDER_MAX) + " e mais" : fmtFaixa(faixaMax)}`}
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {mostrarFaixaPreco && (
+              <div className="absolute top-full left-0 mt-2 z-50 bg-[#0e1829] border border-white/10 rounded-xl p-4 shadow-2xl" style={{ width: "280px" }}>
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-xs font-semibold text-slate-300">Faixa de preço</p>
+                  {(faixaMin > 0 || faixaMax < PRECO_SLIDER_MAX) && (
+                    <button
+                      type="button"
+                      onClick={() => { setFaixaMin(0); setFaixaMax(PRECO_SLIDER_MAX); }}
+                      className="text-[10px] text-slate-500 hover:text-red-400"
+                    >
+                      Limpar
+                    </button>
+                  )}
+                </div>
+                <p className="text-sm font-bold text-white mb-3">
+                  {fmtFaixa(faixaMin)} – {faixaMax >= PRECO_SLIDER_MAX ? `${fmtFaixa(PRECO_SLIDER_MAX)} e mais` : fmtFaixa(faixaMax)}
+                </p>
+                <SliderRange
+                  valMin={faixaMin}
+                  valMax={faixaMax}
+                  onChange={(min, max) => { setFaixaMin(min); setFaixaMax(max); }}
+                />
+                <div className="flex justify-between mt-2">
+                  <span className="text-[10px] text-slate-600">R$ 0</span>
+                  <span className="text-[10px] text-slate-600">R$ 10M+</span>
+                </div>
+              </div>
+            )}
+          </div>
 
-          <select value={precoMaxFiltro} onChange={e => setPrecoMaxFiltro(e.target.value)} className={selectClass}>
-            <option value="">Preço máx.</option>
-            <option value="500000">Até R$ 500mil</option>
-            <option value="1000000">Até R$ 1M</option>
-            <option value="2000000">Até R$ 2M</option>
-            <option value="5000000">Até R$ 5M</option>
-          </select>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMostrarArea(v => !v)}
+              className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 border transition-all ${
+                areaMin || areaMax
+                  ? "bg-blue-600/20 border-blue-500/40 text-blue-300"
+                  : "bg-[#070d1a] border-white/10 text-slate-400 hover:text-slate-300"
+              }`}
+            >
+              {areaMin || areaMax
+                ? `${areaMin || "0"}m² – ${areaMax || "∞"}m²`
+                : "Área útil"}
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {mostrarArea && (
+              <div className="absolute top-full left-0 mt-2 z-50 bg-[#0e1829] border border-white/10 rounded-xl p-4 shadow-2xl" style={{ width: "220px" }}>
+                <div className="flex justify-between items-center mb-3">
+                  <p className="text-xs font-semibold text-slate-300">Área útil (m²)</p>
+                  {(areaMin || areaMax) && (
+                    <button type="button" onClick={() => { setAreaMin(""); setAreaMax(""); }}
+                      className="text-[10px] text-slate-500 hover:text-red-400">Limpar</button>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="block text-[10px] text-slate-500 mb-1">Mínima</label>
+                    <input
+                      type="number" min="0" value={areaMin}
+                      onChange={e => setAreaMin(e.target.value)}
+                      placeholder="Ex: 60"
+                      className="w-full bg-[#0b1525] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 outline-none focus:border-blue-500 transition-all"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-[10px] text-slate-500 mb-1">Máxima</label>
+                    <input
+                      type="number" min="0" value={areaMax}
+                      onChange={e => setAreaMax(e.target.value)}
+                      placeholder="Ex: 200"
+                      className="w-full bg-[#0b1525] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 outline-none focus:border-blue-500 transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
 
-          {/* Comodidades — sempre no final */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setMostrarQtsSuites(v => !v)}
+              className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 border transition-all ${
+                quartosFiltro || suitesFiltro
+                  ? "bg-blue-600/20 border-blue-500/40 text-blue-300"
+                  : "bg-[#070d1a] border-white/10 text-slate-400 hover:text-slate-300"
+              }`}
+            >
+              {quartosFiltro && suitesFiltro
+                ? `${quartosFiltro} qts / ${suitesFiltro} suítes`
+                : quartosFiltro
+                  ? `${quartosFiltro} quartos`
+                  : suitesFiltro
+                    ? `${suitesFiltro} suítes`
+                    : "Quartos e suítes"}
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {mostrarQtsSuites && (
+              <div className="absolute top-full left-0 mt-2 z-50 bg-[#0e1829] border border-white/10 rounded-xl p-4 shadow-2xl" style={{ width: "220px" }}>
+                <div className="flex justify-between items-center mb-3">
+                  <p className="text-xs font-semibold text-slate-300">Quartos e suítes</p>
+                  {(quartosFiltro || suitesFiltro) && (
+                    <button type="button" onClick={() => { setQuartosFiltro(""); setSuitesFiltro(""); }}
+                      className="text-[10px] text-slate-500 hover:text-red-400">Limpar</button>
+                  )}
+                </div>
+                <div className="mb-3">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Quartos</p>
+                  <div className="flex gap-1.5">
+                    {["1","2","3","4+"].map(op => (
+                      <button key={op} type="button"
+                        onClick={() => setQuartosFiltro(quartosFiltro === op ? "" : op)}
+                        className={`flex-1 py-1.5 text-[11px] font-medium rounded-lg border transition-all ${
+                          quartosFiltro === op
+                            ? "bg-blue-600/20 border-blue-500/40 text-blue-300"
+                            : "bg-white/4 border-white/8 text-slate-400 hover:text-slate-200"
+                        }`}>
+                        {op}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Suítes</p>
+                  <div className="flex gap-1.5">
+                    {["1","2","3","4+"].map(op => (
+                      <button key={op} type="button"
+                        onClick={() => setSuitesFiltro(suitesFiltro === op ? "" : op)}
+                        className={`flex-1 py-1.5 text-[11px] font-medium rounded-lg border transition-all ${
+                          suitesFiltro === op
+                            ? "bg-blue-600/20 border-blue-500/40 text-blue-300"
+                            : "bg-white/4 border-white/8 text-slate-400 hover:text-slate-200"
+                        }`}>
+                        {op}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="relative">
             <button type="button" onClick={() => setMostrarComod(v => !v)}
               className={`flex items-center gap-1.5 text-xs rounded-lg px-3 py-1.5 border transition-all ${comodidades.length > 0 ? "bg-blue-600/20 border-blue-500/40 text-blue-300" : "bg-[#070d1a] border-white/10 text-slate-400 hover:text-slate-300"}`}>
@@ -428,7 +490,7 @@ function VitrineCuradoria() {
           </div>
         </div>
 
-        {/* Grid de cards */}
+        <div className="min-h-[480px]">
         {carregando ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -445,7 +507,7 @@ function VitrineCuradoria() {
           <div className="py-16 text-center">
             <p className="text-slate-500 text-sm">Nenhum imóvel encontrado com os filtros selecionados.</p>
             <button
-              onClick={() => { setTipoFiltro(""); setQuartosFiltro(""); setPrecoMinFiltro(""); setPrecoMaxFiltro(""); setComodidades([]); }}
+              onClick={() => { setTipoFiltro(""); setQuartosFiltro(""); setSuitesFiltro(""); setFaixaMin(0); setFaixaMax(PRECO_SLIDER_MAX); setBairroFiltro(""); setAreaMin(""); setAreaMax(""); setComodidades([]); }}
               className="mt-3 text-blue-400 hover:text-blue-300 text-xs underline"
             >
               Limpar filtros
@@ -519,26 +581,18 @@ function VitrineCuradoria() {
             })}
           </div>
         )}
+        </div>
       </div>
     </section>
   );
 }
 
-/* ════════════════════════════════════════════════════════════════════════════
-   COMPONENTE PRINCIPAL
-═══════════════════════════════════════════════════════════════════════════ */
 export default function HomePage() {
   const router = useRouter();
 
   const [busca, setBusca] = useState("");
   const [buscando, setBuscando] = useState(false);
   const [erroIA, setErroIA] = useState("");
-
-  const [abaAtiva, setAbaAtiva] = useState("inteligente");
-
-  const [buscaFiltrada, setBuscaFiltrada] = useState("");
-  const [filtros, setFiltros] = useState(FILTROS_INICIAL);
-  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalAberto, setModalAberto] = useState(false);
@@ -560,25 +614,8 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    if (filtrosAbertos) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [filtrosAbertos]);
-
   const abrirModal = (e) => { e.preventDefault(); setModalAberto(true); setStatusAnuncio(null); };
   const fecharModal = () => { setModalAberto(false); setFormAnuncio({ nome: "", telefone: "", email: "", preferencia: "" }); setStatusAnuncio(null); };
-
-  const qtdFiltrosAtivos = [
-    filtros.finalidade,
-    ...filtros.tipos,
-    filtros.precoMin, filtros.precoMax,
-    filtros.areaMin, filtros.areaMax,
-    filtros.quartos, filtros.suites, filtros.banheiros, filtros.vagas,
-  ].filter(Boolean).length;
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -604,28 +641,6 @@ export default function HomePage() {
     }
   };
 
-  const handleBuscaFiltrada = (e) => {
-    if (e && e.preventDefault) e.preventDefault();
-    const params = new URLSearchParams();
-    if (buscaFiltrada.trim()) params.set("termo", buscaFiltrada.trim());
-    if (filtros.finalidade) params.set("finalidade", filtros.finalidade);
-    filtros.tipos.forEach(t => params.append("tipo", t));
-    if (filtros.precoMin) params.set("preco_min", filtros.precoMin.replace(/\./g, ''));
-    if (filtros.precoMax) params.set("preco_max", filtros.precoMax.replace(/\./g, ''));
-    if (filtros.areaMin) params.set("area_min", filtros.areaMin);
-    if (filtros.areaMax) params.set("area_max", filtros.areaMax);
-    if (filtros.quartos) params.set("quartos", filtros.quartos);
-    if (filtros.suites) params.set("suites", filtros.suites);
-    if (filtros.banheiros) params.set("banheiros", filtros.banheiros);
-    if (filtros.vagas) params.set("vagas", filtros.vagas);
-    router.push(`/busca?${params.toString()}`);
-  };
-
-  const aplicarFiltros = () => {
-    setFiltrosAbertos(false);
-    document.body.style.overflow = '';
-  };
-
   const enviarAnuncio = async (e) => {
     e.preventDefault();
     setEnviandoAnuncio(true);
@@ -649,7 +664,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#070d1a] text-white">
 
-      {/* ─── HEADER ──────────────────────────────────────────────────────── */}
       <header className="absolute top-0 left-0 right-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -681,7 +695,6 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ─── HERO ────────────────────────────────────────────────────────── */}
       <section
         className="relative flex flex-col items-center justify-center min-h-screen bg-cover bg-center"
         style={{ backgroundImage: "url('/foto_capa.jpg')" }}
@@ -711,65 +724,41 @@ export default function HomePage() {
             Descreva o que você procura e nossa IA encontra as melhores opções para você.
           </p>
 
-          {/* ─── BUSCADOR COM ABAS ─────────────────────────────────────── */}
-          <div className="w-full bg-[#0F172A]/90 backdrop-blur-xl border border-slate-700/60 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden">
-
-            <div className="flex border-b border-slate-800">
-              <button
-                type="button"
-                onClick={() => setAbaAtiva("inteligente")}
-                className={`flex-1 py-2.5 text-xs font-semibold tracking-wide transition-colors ${
-                  abaAtiva === "inteligente"
-                    ? "border-b-2 border-blue-500 text-white"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                Busca Inteligente
-              </button>
-              <button
-                type="button"
-                onClick={() => setAbaAtiva("filtrada")}
-                className={`flex-1 py-2.5 text-xs font-semibold tracking-wide transition-colors ${
-                  abaAtiva === "filtrada"
-                    ? "border-b-2 border-blue-500 text-white"
-                    : "text-slate-400 hover:text-slate-200"
-                }`}
-              >
-                Busca Filtrada
-              </button>
-            </div>
-
-            {abaAtiva === "inteligente" && (
-              <form onSubmit={handleSearch} className="p-3 sm:p-4 flex flex-col gap-3">
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                    <IconSparkles className="w-4 h-4" />
+          <form onSubmit={handleSearch} className="w-full">
+            <div className="relative rounded-2xl p-px bg-gradient-to-r from-blue-600/40 via-slate-700/60 to-blue-600/40 shadow-2xl shadow-blue-900/30">
+              <div className="rounded-2xl bg-[#0c1628]/95 backdrop-blur-xl px-5 pt-4 pb-4 flex flex-col gap-3">
+                <div className="relative flex items-center gap-3">
+                  <span className="text-blue-400 flex-shrink-0">
+                    <IconSparkles className="w-5 h-5" />
                   </span>
-                  {busca === "" && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute left-10 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-sm truncate max-w-[calc(100%-3rem)] transition-opacity duration-400"
-                      style={{ opacity: placeholderVisible ? 1 : 0 }}
-                    >
-                      {SUGESTOES[sugestaoIdx]}
-                    </span>
-                  )}
-                  <input
-                    type="text"
-                    value={busca}
-                    onChange={(e) => setBusca(e.target.value)}
-                    placeholder=""
-                    className="w-full h-11 pl-10 pr-4 rounded-xl bg-[#0B1120] border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  />
+                  <div className="relative flex-1">
+                    {busca === "" && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-sm truncate max-w-full transition-opacity duration-400"
+                        style={{ opacity: placeholderVisible ? 1 : 0 }}
+                      >
+                        {SUGESTOES[sugestaoIdx]}
+                      </span>
+                    )}
+                    <input
+                      type="text"
+                      value={busca}
+                      onChange={(e) => setBusca(e.target.value)}
+                      placeholder=""
+                      className="w-full bg-transparent text-slate-100 text-sm focus:outline-none py-2"
+                    />
+                  </div>
                 </div>
+                <div className="h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
                 <button
                   type="submit"
                   disabled={buscando}
-                  className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 active:scale-[0.98] text-white font-bold text-sm flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-lg shadow-blue-700/30"
                 >
                   {buscando ? (
                     <>
-                      <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                       </svg>
@@ -777,57 +766,23 @@ export default function HomePage() {
                     </>
                   ) : (
                     <>
-                      <IconSparkles className="w-3.5 h-3.5 text-white" />
+                      <IconSparkles className="w-4 h-4" />
                       Buscar com IA
                     </>
                   )}
                 </button>
-                {erroIA && (
-                  <p className="text-red-400 text-xs flex items-center gap-1.5 px-1">
-                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                    </svg>
-                    {erroIA}
-                  </p>
-                )}
-              </form>
+              </div>
+            </div>
+            {erroIA && (
+              <p className="text-red-400 text-xs flex items-center gap-1.5 px-1 mt-2">
+                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                {erroIA}
+              </p>
             )}
+          </form>
 
-            {abaAtiva === "filtrada" && (
-              <form onSubmit={handleBuscaFiltrada} className="p-3 sm:p-4 flex flex-col gap-3">
-                <input
-                  type="text"
-                  value={buscaFiltrada}
-                  onChange={(e) => setBuscaFiltrada(e.target.value)}
-                  placeholder="Ex: Umarizal, apartamentos, Belém..."
-                  className="w-full h-11 px-4 rounded-xl bg-[#0B1120] border border-slate-700 text-slate-200 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                />
-                <div className="flex items-center justify-between gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setFiltrosAbertos(true)}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-600 text-xs font-semibold transition-colors"
-                  >
-                    <IconFunnel />
-                    Filtros
-                    {qtdFiltrosAtivos > 0 && (
-                      <span className="ml-0.5 bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[9px] font-bold">
-                        {qtdFiltrosAtivos}
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    type="submit"
-                    className="h-9 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-bold text-xs tracking-wide shadow-lg shadow-blue-900/40 transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
-                  >
-                    Buscar Imóveis
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-
-          {/* Badges de confiança */}
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 pb-2">
             <span className="flex items-center gap-1.5 text-[11px] text-slate-400">
               <span className="w-5 h-5 rounded-full bg-emerald-900/40 border border-emerald-700/30 flex items-center justify-center flex-shrink-0">
@@ -872,7 +827,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── ESTATÍSTICAS ────────────────────────────────────────────────── */}
       <section className="bg-[#070d1a] border-t border-white/5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
@@ -891,20 +845,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── PAINEL DE FILTROS ───────────────────────────────────────────── */}
-      {filtrosAbertos && (
-        <PainelFiltros
-          filtros={filtros}
-          setFiltros={setFiltros}
-          onAplicar={aplicarFiltros}
-          onFechar={() => setFiltrosAbertos(false)}
-        />
-      )}
-
-      {/* ─── VITRINE CURADORIA ───────────────────────────────────────────── */}
       <VitrineCuradoria />
 
-      {/* ─── FOOTER ──────────────────────────────────────────────────────── */}
       <footer className="border-t border-white/8 bg-[#070d1a]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
           <Image src="/logo_nome.png" alt="Nexus Habitar" width={160} height={50} className="h-6 w-auto object-contain opacity-50" />
@@ -918,7 +860,6 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* ─── MODAL — ANUNCIE SEU IMÓVEL ──────────────────────────────────── */}
       {modalAberto && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) fecharModal(); }}>
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
